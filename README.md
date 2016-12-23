@@ -2,7 +2,7 @@
 
 Embed Console is an embeddable javascript sandbox. It allows users to communicate with an application directly using javascript and display the results. 
 
-[CodePen](https://codepen.io/recursiveEd/pen/QGMjEL).
+[CodePen](https://codepen.io/recursiveEd/pen/KNbLKN).
 
 ## Contributing
 
