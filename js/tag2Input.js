@@ -6,7 +6,6 @@ var Tag2Input = ( function() {
 
   var inputChange = function ( tag2Input, hiddenSpan ) {
     var delimiter = tag2Input.delimiter.join('|'); 
-    console.log(delimiter);
     var delimiterRegex = new RegExp( delimiter );
     return function( e ){
       if ( delimiterRegex.test( this.value ) ) {
@@ -60,7 +59,6 @@ var Tag2Input = ( function() {
     container.appendChild( hiddenSpan );
     container.appendChild( input );
     var style = input.currentStyle || window.getComputedStyle(input);
-    console.log(style.border)
   };
 
   var dropCallback = function ( isLeft ) {
@@ -139,7 +137,7 @@ var Tag2Input = ( function() {
 
   Tag2Input.prototype = {
     add : function( labels ) {
-      if ( ! ( labels instanceof Array ) ) labels = [ label ];
+      if ( ! ( labels instanceof Array ) ) labels = [ labels ];
       for ( var i = 0; i < labels.length; i++ ) {
         labels[i] = createLabel( labels[i].trim(), this.editable, this.draggable );
         this.container.insertBefore( labels[i] , this.input);
@@ -158,8 +156,15 @@ var Tag2Input = ( function() {
       if ( !index ) return tags;
       index = ( tags.length + index ) % tags.length;
       return tags[index];
+    },
+    values: function() {
+      var labels = this.container.getElementsByClassName('label');
+      //var values = new Array(labels.length);
+      //for ( var i = 0; i < labels.length; i++ ) values[i] = labels[i].innerText;
+      //return values;
+      return [].map.call( labels, function( item ) { return item.innerText; } );
     }
   };
 
   return Tag2Input;
-} )();
+})();
