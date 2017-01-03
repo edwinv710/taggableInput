@@ -3,42 +3,53 @@ var Tag2Input = ( function() {
   var containerClass = 'tag2-input';
   var labelClass    =  'label';
   var defaultDelimiters = [ ' ' ];
+  
+  var events = {
+    beforeInsert : function ( text, index ) { return text; },
+    afterInsert  : function ( label, index, text ) { }
+  };
+
+  var addTags    = function ( tag2Input, hiddenSpan, delimiterRegex, input ) {
+    var items = input.value.split( delimiterRegex );
+    if ( items[ items.length - 1 ].length === 0 ) items.pop();
+    tag2Input.add( items );
+    input.value = '';
+  }
 
   var inputChange = function ( tag2Input, hiddenSpan ) {
-    var delimiter = tag2Input.delimiter.join('|'); 
+    var delimiter      = tag2Input.delimiter.join('|'); 
     var delimiterRegex = new RegExp( delimiter );
     return function( e ){
-      if ( delimiterRegex.test( this.value ) ) {
-        var items = this.value.split( delimiterRegex );
-        if ( delimiterRegex.test( this.value[ this.value.length - 1 ] ) ) items.pop();
-        tag2Input.add( items );
-        this.value = '';
-        hiddenSpan.innerHTML = '';   
-      } else hiddenSpan.innerHTML = this.value;
+      if ( delimiterRegex.test( this.value ) ) addTags( tag2Input, hiddenSpan,  delimiterRegex, this); 
+      hiddenSpan.innerHTML = this.value;
       this.style.width = hiddenSpan.clientWidth + ( this.offsetWidth - this.clientWidth + 5 ) + 'px';
     };
   }
   
-  var createContainer = function( container ) {
+  var createContainer = function( container, input ) {
     if ( typeof container === 'string' ) container = document.getElementById( container );
     if ( ! (container instanceof HTMLElement ) ) throw 'Please provide a valid container.';
     container.className = ' '+containerClass;
-    container.onclick = function( e ) {
+    container.onclick   = function( e ) {
       if ( e.target !== this ) return;
-      this.getElementsByTagName('input')[0].focus();
+      input.focus();
     }
     return container;
   };
 
   var createHiddenSpan = function() {
-    var span = document.createElement('span');
+    var span  = document.createElement('span');
+    var style = {
+      position : 'absolute',
+      display  : 'inline-block',
+      height   : '0px',
+      left     : '0',
+      top      : '0',
+      overflow : 'hidden' 
+    }
     span.className = 'hiddenSpan';
-    span.style.position = 'absolute';
-    span.style.display = 'inline-block';
-    span.style.height = '0px';
-    span.style.left = '0';
-    span.style.top = '0';
-    span.style.overflow = 'hidden';
+    for ( var i in style ) span.style[i] = style[i];
+   // span.style     = style;
     return span;
   }
 
@@ -58,16 +69,14 @@ var Tag2Input = ( function() {
   var build = function ( container, input, hiddenSpan ) {
     container.appendChild( hiddenSpan );
     container.appendChild( input );
-    var style = input.currentStyle || window.getComputedStyle(input);
   };
 
   var dropCallback = function ( isLeft ) {
     return function(e) {
-      var item   = document.getElementById(e.dataTransfer.getData('item'));
-      var target = e.target;
-      var parent = target.parentNode;
-      if (isLeft) parent.parentNode.insertBefore( item, parent );
-      else        parent.parentNode.insertBefore( item, parent.nextSibling );
+      var item   = document.getElementById( e.dataTransfer.getData('item') );
+      var parent = e.target.parentNode;
+      var target = isLeft ? parent : parent.nextSibling;
+      parent.parentNode.insertBefore( item, target );
       e.stopPropagation();
       return false;
     }
@@ -90,13 +99,17 @@ var Tag2Input = ( function() {
       content.addEventListener('keydown', function(e){
         if ( e.which === 8 && this.innerHTML.length === 1 ) this.parentNode.parentNode.removeChild(this.parentNode);
       });
+      ['keyup','mouseup','cut'].map( function( event ) { 
+        content.addEventListener( event, function(e){
+          if( this.innerHTML.length == 0 ) this.parentNode.parentNode.removeChild(this.parentNode); 
+        });
+      });
     }
   
     left.className  = 'drop-left';
     left.innerHTML  = '&nbsp;'
     right.innerHTML = '&nbsp;'
     right.className = 'drop-right';
-
     
     outer.appendChild( left    );
     outer.appendChild( content );
@@ -120,7 +133,7 @@ var Tag2Input = ( function() {
     
 
     return outer;
-  }  
+  };  
 
   var Tag2Input = function( container, opts ) {
     var hiddenSpan = createHiddenSpan();
@@ -130,28 +143,30 @@ var Tag2Input = ( function() {
     this.editable  = opts.editable != false;
     this.draggable = opts.draggable != false;
 
-    this.container = createContainer( container );
     this.input     = createInput( this, hiddenSpan );
+    this.container = createContainer( container, this.input );
+  
+    for ( var i in events ) this[ i ] = opts[ i ] || events[ i ];
+
     build( this.container, this.input, hiddenSpan );
-  }
+  };
 
   Tag2Input.prototype = {
     add : function( labels ) {
-      if ( ! ( labels instanceof Array ) ) labels = [ labels ];
+      labels = ( labels instanceof Array ) ? labels : [ labels ];
       for ( var i = 0; i < labels.length; i++ ) {
-        labels[i] = createLabel( labels[i].trim(), this.editable, this.draggable );
+        labels[i] = this.beforeInsert( labels[i] );
+        labels[i] = createLabel( labels[i], this.editable, this.draggable );
         this.container.insertBefore( labels[i] , this.input);
+        this.afterInsert( labels[i] );
       }
     },
     remove : function( label ) {
       if ( typeof label === 'number' ) label = this.tags( label );
       label.parentNode.removeChild( label );
     },
-    pop : function() {
-      var tag = this.tags(-1);
-      tag.parentNode.removeChild( tag );
-    },
-    tags: function(index) {
+    pop : function() { this.remove( -1 ); },
+    tags: function( index ) {
       var tags = this.container.getElementsByClassName( labelClass );
       if ( !index ) return tags;
       index = ( tags.length + index ) % tags.length;
@@ -159,12 +174,8 @@ var Tag2Input = ( function() {
     },
     values: function() {
       var labels = this.container.getElementsByClassName('label');
-      //var values = new Array(labels.length);
-      //for ( var i = 0; i < labels.length; i++ ) values[i] = labels[i].innerText;
-      //return values;
       return [].map.call( labels, function( item ) { return item.innerText; } );
-    }
+    },
   };
-
   return Tag2Input;
 })();
