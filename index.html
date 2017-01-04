@@ -10,9 +10,24 @@
   
   <link rel="stylesheet" href="css/tag2Input.css?v=1.0">
   <style>
+    @import url('https://fonts.googleapis.com/css?family=Lato');
     .container {
-      magin: 0 auto;
+      margin: 0 auto;
       padding: 20px;
+      width: 800px;
+      background-color: #fff;
+      box-shadow: 0 0 0 0, 0 6px 12px rgba(34,34,34,0.1);
+      -webkit-border-radius: 3px;
+      -moz-border-radius: 3px;
+      border-radius: 3px;
+      margin-top: 30px;
+      background-color: white;
+    }
+    body {
+      background-color: #e8e8e8;
+      color: #222;
+      font-size: 14px;
+      font-family: lato;
     }
   </style>
   <!--[if lt IE 9]>
@@ -22,14 +37,13 @@
 
 <body>
   <section class='container'>
-    <p> Lorem </p>
-    <div id='taginput'>
-    
-    </div>
+    <h1> Taggable Input </h1>
+    <p> Taggable Input is a javascript library that allows for the seamless creation of tags. </p>
+    <div id='example-input'> </div>
   </section>
   <script src="js/tag2Input.js"></script>
   <script>
-    var tagInput = new Tag2Input( 'taginput', {});
+    var tagInput = new Tag2Input( 'example-input', {});
   </script>
 </body>
 </html>

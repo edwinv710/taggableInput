@@ -44,6 +44,7 @@
 .tag2-input input {
   outline: none;
   border: none;
+  font-family: inherit;
   max-width: 100% !important;
 }
 

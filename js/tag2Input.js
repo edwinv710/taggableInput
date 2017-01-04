@@ -19,9 +19,9 @@ var Tag2Input = ( function() {
   var inputChange = function ( tag2Input, hiddenSpan ) {
     var delimiter      = tag2Input.delimiter.join('|'); 
     var delimiterRegex = new RegExp( delimiter );
-    return function( e ){
+    return function( e ) {
       if ( delimiterRegex.test( this.value ) ) addTags( tag2Input, hiddenSpan,  delimiterRegex, this); 
-      hiddenSpan.innerHTML = this.value;
+      hiddenSpan.innerText = this.value;
       this.style.width = hiddenSpan.clientWidth + ( this.offsetWidth - this.clientWidth + 5 ) + 'px';
     };
   }
@@ -49,9 +49,8 @@ var Tag2Input = ( function() {
     }
     span.className = 'hiddenSpan';
     for ( var i in style ) span.style[i] = style[i];
-   // span.style     = style;
     return span;
-  }
+  };
 
   var createInput = function( tag2Input, hiddenSpan ) {
     var input  = document.createElement('input');
