@@ -1,4 +1,4 @@
-.tag2-input { 
+.taggable-input { 
   border: solid 1px rgba(0,0,0,0.1);
   padding: 10px; 
   position: relative;
@@ -6,9 +6,9 @@
   font-size: 12px;
 }
 
-.tag2-input input { font-size: 12px; }
+.taggable-input input { font-size: 12px; }
 
-.tag2-input .label {
+.taggable-input .label {
   margin-right: 5px;
   margin-bottom: 5px;
   font-weight: 500;
@@ -38,33 +38,33 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.tag2-input .label span       { display: inline-block; }
-.tag2-input .label[draggable] { cursor: move; }
+.taggable-input .label span       { display: inline-block; }
+.taggable-input .label[draggable] { cursor: move; }
 
-.tag2-input input {
+.taggable-input input {
   outline: none;
   border: none;
   font-family: inherit;
   max-width: 100% !important;
 }
 
-.tag2-input .label .drop-left, 
-.tag2-input .label .drop-right {
+.taggable-input .label .drop-left, 
+.taggable-input .label .drop-right {
   position: absolute;
   width: 10px;
   left: 0; top: 0; bottom: 0;
 }
 
-.tag2-input .label .drop-right { right: 0; left: auto; }
-.tag2-input .label.close       { padding-right: 20px; }
+.taggable-input .label .drop-right { right: 0; left: auto; }
+.taggable-input .label.close       { padding-right: 20px; }
 
-.tag2-input .label.close .drop-right {
+.taggable-input .label.close .drop-right {
   width: 10px;
   cursor: pointer;
   margin-right: 5px;
 }
 
-.tag2-input .label.close .drop-right:after {
+.taggable-input .label.close .drop-right:after {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
   content: 'x';
@@ -72,4 +72,4 @@
   font-size: 80%;
 }
 
-.tag2-input .label .content[contenteditable] { cursor: text; }
+.taggable-input .label .content[contenteditable] { cursor: text; }

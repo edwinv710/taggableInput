@@ -1,6 +1,6 @@
-var Tag2Input = ( function() {
+var TaggableInput = ( function() {
 
-  var containerClass = 'tag2-input';
+  var containerClass = 'taggable-input';
   var labelClass    =  'label';
   var defaultDelimiters = [ ' ' ];
   
@@ -134,7 +134,7 @@ var Tag2Input = ( function() {
     return outer;
   };  
 
-  var Tag2Input = function( container, opts ) {
+  var TaggableInput = function( container, opts ) {
     var hiddenSpan = createHiddenSpan();
     this.delimiter = opts.delimiter  || defaultDelimiters;
     this.delimiter = this.delimiter instanceof Array ?  this.delimiter : [ this.delimiter ];
@@ -150,7 +150,7 @@ var Tag2Input = ( function() {
     build( this.container, this.input, hiddenSpan );
   };
 
-  Tag2Input.prototype = {
+  TaggableInput.prototype = {
     add : function( labels ) {
       labels = ( labels instanceof Array ) ? labels : [ labels ];
       for ( var i = 0; i < labels.length; i++ ) {
@@ -176,5 +176,5 @@ var Tag2Input = ( function() {
       return [].map.call( labels, function( item ) { return item.innerText; } );
     },
   };
-  return Tag2Input;
+  return TaggableInput;
 })();
