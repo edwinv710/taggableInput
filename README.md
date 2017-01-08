@@ -1,4 +1,4 @@
-TaggableInput
+## TaggableInput
 
 Taggable Input allows for the seamless creation of tags directly from an input field. To see it in action, visit the demo on [CodePen] (https://codepen.io/recursiveEd/pen/KNbLKN).
 
@@ -25,43 +25,43 @@ Taggable Input allows for the seamless creation of tags directly from an input f
 * add ( labels ) -  Adds tags to an input.
   * labels ( required ) - A string or an array of string containing the text inside the label.
     * Example: 
-      ``` javascript 
-        taggableInput.add( ['can', 'you', 'see', 'me', 'now' ] );
-      ```
+``` javascript 
+  taggableInput.add( ['can', 'you', 'see', 'me', 'now' ] );
+```
 
 * remove ( index ) -  Removes tags from an input
   * index ( required ) - The zero based index, as a **Number**. 
   * Example: 
-    ``` javascript 
-      taggableInput.remove( ['can', 'you', 'see', 'me', 'now' ] );
-    ```
+``` javascript 
+  taggableInput.remove( ['can', 'you', 'see', 'me', 'now' ] );
+```
 
 * pop -  Removes the last tag from an input.
   * Example: 
-    ```javascript 
-      taggableInput.pop();
-    ```
+```javascript 
+  taggableInput.pop();
+```
 
 * indexOf ( label ) - Returns the index of the first occurrence of the label passed a parameter.
   * label ( required ) - Either a string or an HTMLElement. If a string, returns the index of the first label containing the text. 
   * Example: 
-    ``` javascript
-      var index = taggableInput.indexOf( 'Snow' );
-    ```
+``` javascript
+  var index = taggableInput.indexOf( 'Snow' );
+```
 
 * tags ( index ) - Returns the tag specified by the index as an HTMLElement. If an index is omitted, returns all labels as an array of HTMLElements.
   * index ( optional ) - The zero based index, as a **Number**. 
     * Example: 
-      ```javascript
-        taggableInput.tags();
-      ```
+``` javascript
+  taggableInput.tags();
+```
 
 * values ( index ) - Returns the tag specified by the index as a string. If an index is omitted, returns all labels as an array of strings.
   * index ( optional ) - The zero based index, as a **Number**. 
     * Example: 
-      ```javascript
-        taggableInput.tags();
-      ```
+``` javascript
+  taggableInput.tags();
+```
 
 ### Events
 
@@ -69,22 +69,22 @@ Taggable Input allows for the seamless creation of tags directly from an input f
   * text ( String ) - The text inside the tag.
     * index ( Number ) - The zero-based index.
     * Example: 
-      ```javascript 
-        taggableInput.beforeInput = function( text, index ) {
-          text = text.trim();
-          if( text.length ) return text;
-          return false;
-        };
-       ```
+``` javascript 
+  taggableInput.beforeInput = function( text, index ) {
+    text = text.trim();
+    if( text.length ) return text;
+    return false;
+  };
+ ```
 
 * afterInsert ( label, text, index) - Executes after a tag is inserted.
   * label ( HTMLElement ) - The newly added dom element.
   * text ( String ) - A string representation of the tag.
   * index ( Number ) - The zero-based index.
   * Example: 
-  ```javascript 
-    taggableInput.tags();
-  ```
+``` javascript 
+  taggableInput.tags();
+```
 
 ## Contributing
 
