@@ -163,8 +163,12 @@ var TaggableInput = ( function() {
     remove : function( label ) {
       if ( typeof label === 'number' ) label = this.tags( label );
       label.parentNode.removeChild( label );
+      return label;
     },
-    pop : function() { this.remove( -1 ); },
+    pop : function() { 
+      var label = this.remove( -1 ); 
+      return label; 
+    },
     tags: function( index ) {
       var tags = this.container.getElementsByClassName( labelClass );
       if ( !index ) return tags;

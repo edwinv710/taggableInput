@@ -1,44 +1,90 @@
-## TaggableInput
+TaggableInput
 
 Taggable Input allows for the seamless creation of tags directly from an input field. To see it in action, visit the demo on [CodePen] (https://codepen.io/recursiveEd/pen/KNbLKN).
 
 ### Getting Started
 
-''' javacscript
-new TaggableInput ( container, { delimiter, editable, draggable, removable } );
-'''
+``` javascript
+  new TaggableInput ( container, { delimiter, editable, draggable, removable } );
+```
+* container ( required ) - An **HTMLElement** or a **string** containing the Id of the DOM element where the input will append.
+* delimiter ( optional ) - A string or an array of string that, upon typing, triggers the creating of a tag. The default value is **' '**.
+* editable  ( optional ) - If set to true, a tag can be edited in place. The default value is **true**.
+* draggable ( optional ) - If true tags can be dragged and rearranged by users. The default value is **true**.
+* removable ( optional ) - If set to true, tags are removable upon clicking an x marker. The default value is **true**.
 
-* container ( required ) - An **HTMLElement object** or string containg the id of the dom element where the input will be appended.
-* delimiter ( optional ) - Character or characters that triggers the creation of a tag upon typing. The default value is ' '.
-* editable ( optional ) - Indicates whether tags created can be changed by the user. The default value is true.
-* draggable ( optional ) - Indicates whether tags whether tags can be dragged and rearanged by a users. The default value is true.
-* removable ( optional ) - Indicates whether tags display the option to remove them individually. The default value is true.
+``` javascript
+  var tinput = new TaggableInput( 'tinput', {
+    removable: false,
+    draggable: false
+  });
+```
 
 ### Methods
 
-* add ( labels ) -  Adds tags to the input.
-  * labels: A string or an array of string containing the text of the labels to be added.
-  * Example: taggableInput.add( ['can', 'you', 'see', 'me', 'now' ] )
+* add ( labels ) -  Adds tags to an input.
+  * labels ( required ) - A string or an array of string containing the text inside the label.
+    * Example: 
+      ``` javascript 
+        taggableInput.add( ['can', 'you', 'see', 'me', 'now' ] );
+      ```
 
-* remove ( labels ) -  Removes tags from input
-  * labels: A string or an array of string containing the text of the labels to be removed.
-  * Example: taggableInput.remove( ['can', 'you', 'see', 'me', 'now' ] )
+* remove ( index ) -  Removes tags from an input
+  * index ( required ) - The zero based index, as a **Number**. 
+  * Example: 
+    ``` javascript 
+      taggableInput.remove( ['can', 'you', 'see', 'me', 'now' ] );
+    ```
 
 * pop -  Removes the last tag from an input.
-  * Example: taggableInput.pop();
+  * Example: 
+    ```javascript 
+      taggableInput.pop();
+    ```
 
-* tags - Return all tags. 
-  * Example: taggableInput.tags();
+* indexOf ( label ) - Returns the index of the first occurrence of the label passed a parameter.
+  * label ( required ) - Either a string or an HTMLElement. If a string, returns the index of the first label containing the text. 
+  * Example: 
+    ``` javascript
+      var index = taggableInput.indexOf( 'Snow' );
+    ```
+
+* tags ( index ) - Returns the tag specified by the index as an HTMLElement. If an index is omitted, returns all labels as an array of HTMLElements.
+  * index ( optional ) - The zero based index, as a **Number**. 
+    * Example: 
+      ```javascript
+        taggableInput.tags();
+      ```
+
+* values ( index ) - Returns the tag specified by the index as a string. If an index is omitted, returns all labels as an array of strings.
+  * index ( optional ) - The zero based index, as a **Number**. 
+    * Example: 
+      ```javascript
+        taggableInput.tags();
+      ```
 
 ### Events
 
-* beforeInsert ( text, index ) -  Executes before a tag is added to an input. If the function returns false, the tag will not be added. The function recieves the text, as a string, to be added to the input and the index, as a number, that the label will occupy. 
-  * Example: taggableInput.beforeInput = function(  ) {
-               if( tag.trim().length === 0 ) return false
-             }
-             
-* afterInsert ( label, index, text ) - Executes after a taf is added to the input. The function recieves the newly label, as a dom element, the text pertaining to the label, as a string, and the index of the label, as a number.
-  * Example: taggableInput.tags();
+* beforeInsert ( text, index ) -  Executes before a tag is inserted. To prevent the insertion of a tag, set the function to returns false. To change the tag's text, return a string with the desired text.
+  * text ( String ) - The text inside the tag.
+    * index ( Number ) - The zero-based index.
+    * Example: 
+      ```javascript 
+        taggableInput.beforeInput = function( text, index ) {
+          text = text.trim();
+          if( text.length ) return text;
+          return false;
+        };
+       ```
+
+* afterInsert ( label, text, index) - Executes after a tag is inserted.
+  * label ( HTMLElement ) - The newly added dom element.
+  * text ( String ) - A string representation of the tag.
+  * index ( Number ) - The zero-based index.
+  * Example: 
+  ```javascript 
+    taggableInput.tags();
+  ```
 
 ## Contributing
 
@@ -46,6 +92,4 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/edwinv
 
 ### License
 
-The library is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT). callback for invalid inputs
-- add css to distinguish between valid and invalid inputs.
-
+The library is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
