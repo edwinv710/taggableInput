@@ -81,7 +81,7 @@ var TaggableInput = ( function() {
     }
   }
 
-  var createLabel = function( item, editable, draggable ) {
+  var createLabel = function( taggableInput, item ) {
     var outer   = document.createElement('div' );
     var left    = document.createElement('span');
     var content = document.createElement('span');
@@ -93,7 +93,7 @@ var TaggableInput = ( function() {
     content.innerText = item;
     content.className = 'content';
     
-    if ( editable ) {
+    if ( taggableInput.editable ) {
       content.setAttribute('contenteditable', true);
       content.addEventListener('keydown', function(e){
         if ( e.which === 8 && this.innerHTML.length === 1 ) this.parentNode.parentNode.removeChild(this.parentNode);
@@ -105,6 +105,13 @@ var TaggableInput = ( function() {
       });
     }
   
+    if ( taggableInput.removable ) {
+      outer.className += ' close';
+      right.addEventListener('click', function (e) {
+        this.parentNode.parentNode.removeChild( this.parentNode); 
+      });
+    }
+
     left.className  = 'drop-left';
     left.innerHTML  = '&nbsp;'
     right.innerHTML = '&nbsp;'
@@ -114,7 +121,7 @@ var TaggableInput = ( function() {
     outer.appendChild( content );
     outer.appendChild( right   );
 
-    if ( draggable ) {
+    if ( taggableInput.draggable ) {
       outer.setAttribute('draggable', 'true');
       left.addEventListener ('dragenter', function (e) { e.preventDefault(); return true; });
       right.addEventListener('dragenter', function (e) { e.preventDefault(); return true; });
@@ -141,7 +148,7 @@ var TaggableInput = ( function() {
     this.delimiter = this.delimiter.map(function(item){ return item.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"); });
     this.editable  = opts.editable != false;
     this.draggable = opts.draggable != false;
-
+    this.removable = opts.removable != false;
     this.input     = createInput( this, hiddenSpan );
     this.container = createContainer( container, this.input );
   
@@ -155,7 +162,7 @@ var TaggableInput = ( function() {
       labels = ( labels instanceof Array ) ? labels : [ labels ];
       for ( var i = 0; i < labels.length; i++ ) {
         labels[i] = this.beforeInsert( labels[i] );
-        labels[i] = createLabel( labels[i], this.editable, this.draggable );
+        labels[i] = createLabel( this, labels[i] );
         this.container.insertBefore( labels[i] , this.input);
         this.afterInsert( labels[i] );
       }
