@@ -75,13 +75,13 @@ var Tag2Input = ( function() {
     }
   }
 
-  var createLabel = function( item, editable, draggable ) {
+  var createLabel = function( item, editable, draggable, toDelete ) {
     var outer   = document.createElement('div' );
     var left    = document.createElement('span');
     var content = document.createElement('span');
     var right   = document.createElement('span');
     
-    outer.className = 'label label-primary'
+    outer.className = 'label close'
     outer.id          = 'label-' + Math.random().toString(36).substr(2, 18).toUpperCase();
     
     content.innerText = item;
@@ -103,6 +103,8 @@ var Tag2Input = ( function() {
     outer.appendChild( left    );
     outer.appendChild( content );
     outer.appendChild( right   );
+
+    if ( toDelete ) right.addEventListener('click', function (e) { this.parentNode.parentNode.removeChild(this.parentNode); });
 
     if ( draggable ) {
       outer.setAttribute('draggable', 'true');
@@ -131,6 +133,7 @@ var Tag2Input = ( function() {
     this.delimiter = this.delimiter.map(function(item){ return item.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"); });
     this.editable  = opts.editable != false;
     this.draggable = opts.draggable != false;
+    this.delete    = opts.delete != false;
 
     this.container = createContainer( container );
     this.input     = createInput( this, hiddenSpan );
@@ -141,7 +144,7 @@ var Tag2Input = ( function() {
     add : function( labels ) {
       if ( ! ( labels instanceof Array ) ) labels = [ label ];
       for ( var i = 0; i < labels.length; i++ ) {
-        labels[i] = createLabel( labels[i].trim(), this.editable, this.draggable );
+        labels[i] = createLabel( labels[i].trim(), this.editable, this.draggable, this.delete );
         this.container.insertBefore( labels[i] , this.input);
       }
     },
