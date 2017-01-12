@@ -87,7 +87,7 @@ var TaggableInput = ( function() {
     var content = document.createElement('span');
     var right   = document.createElement('span');
     
-    outer.className = 'label label-primary'
+    outer.className = 'label close'
     outer.id          = 'label-' + Math.random().toString(36).substr(2, 18).toUpperCase();
     
     content.innerText = item;
