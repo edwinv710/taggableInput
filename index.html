@@ -29,6 +29,10 @@
       font-size: 14px;
       font-family: lato;
     }
+    p.payload {
+      white-space: pre;
+
+    }
   </style>
   <!--[if lt IE 9]>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
@@ -39,12 +43,45 @@
   <section class='container'>
     <h1> Taggable Input </h1>
     <p> Taggable Input is a javascript library that allows for the seamless creation of tags. </p>
-    <h4> Example: </h4>
+    <h4> Basic Example: </h4>
     <div id='example-input'> </div>
+    <br>
+    <h4> Form Example </h4>
+    <p> A basic form example. Unpon clicking submit, the form's payload will be printed below. </p>
+    <form>
+      <label for='name'> Name: </label>
+      <input name=name type=text value='Jon Snow' />
+      <label for=interests> Interests: </label>
+      <input name=interests type=text />
+      <input type=submit />
+    </form>
+    <h4> Results </h4>
+    <p class='payload'>
+    </p>
   </section>
   <script src="js/tag2Input.js"></script>
   <script>
-    var  tagInput = new TaggableInput( 'example-input', {});
+    var results     = document.querySelector( 'p.payload' );
+    var form        = document.forms[0];
+    var formInput   = document.querySelector('input[name=interests]'); 
+    var basicTaggbleInput  = new TaggableInput ( 'example-input', {});
+    var formTaggbleInput   = new TaggableInput ( formInput );
+    
+    var payload = function() {
+      var load = {};
+      for ( var i = 0; i < form.elements.length - 1; i++ )
+        if( form.elements[i].name ) load[ form.elements[i].name ] = form.elements[i].value;
+      return load;
+    }
+
+    var appendFormData = function () {
+      results.innerHTML = JSON.stringify( payload() , undefined, 2 );
+    }
+
+   form.addEventListener( 'submit', function ( e ) {
+     e.preventDefault();
+     appendFormData();
+   });
   </script>
 </body>
 </html>
