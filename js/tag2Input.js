@@ -2,7 +2,7 @@ var TaggableInput = ( function() {
 
   var containerClass = 'taggable-input';
   var labelClass    =  'label';
-  var defaultDelimiters = [ ' ' ];
+  var defaultDelimiter = { keycode: [ 13 ], separator: undefined };
 
   var inputCache = {};
   
@@ -10,24 +10,20 @@ var TaggableInput = ( function() {
     beforeInsert : function ( text, index ) { return text; },
     afterInsert  : function ( label, index, text ) { }
   };
-
-  var addTags    = function ( tag2Input, hiddenSpan, delimiterRegex, input ) {
-    var items = input.value.split( delimiterRegex );
-    if ( items[ items.length - 1 ].length === 0 ) items.pop();
-    tag2Input.add( items );
-    input.value = '';
-  }
-
-  var inputChange = function ( tag2Input, hiddenSpan ) {
-    var delimiter      = tag2Input.delimiter.join('|'); 
-    var delimiterRegex = new RegExp( delimiter );
-    return function( e ) {
-      if ( delimiterRegex.test( this.value ) ) addTags( tag2Input, hiddenSpan,  delimiterRegex, this); 
-      hiddenSpan.innerText = this.value;
-      this.style.width = hiddenSpan.clientWidth + ( this.offsetWidth - this.clientWidth + 5 ) + 'px';
-    };
-  }
   
+  var parseDelimiters = function ( del ) {
+    var delimiter = { keycode: [], separator: [] };
+    if ( !( del instanceof Array ) ) del = [ del ];
+    for ( var i = 0; i < del; i++ ){
+      if ( typeof del[ i ] === 'number' )    delimiter.keycode.push( del[i] )
+      else if ( typeof del[i] === 'string' ) delimiter.separator.push( del[i] );
+    }
+    if ( delimiter.keycode.length === 0 && delimiter.separator.length === 0 ) return defaultDelimiter; 
+    delimiter.separator = delimiter.sepatator.length ? new RegExp( delimiter.separator.join('|') ) : undefined;
+    return delimiter;
+  };
+
+
   var createContainer = function( container, input ) {
     if ( typeof container === 'string' ) container = document.getElementById( container );
     if ( ! (container instanceof HTMLElement ) ) throw 'Please provide a valid container.';
@@ -61,7 +57,6 @@ var TaggableInput = ( function() {
   var createHiddenInput = function( name, index, label) {
     var input = document.createElement( 'input' );
     var id    = label.getAttribute( 'data-cid' );
-    console.log( index );
     input.setAttribute( 'type', 'hidden' );
     input.name  = name+'['+index+']';
     input.value = label.innerText;
@@ -69,21 +64,30 @@ var TaggableInput = ( function() {
     return input;
   }
 
+  var inputChange = function ( tag2Input ) {
+    return function( e ) {
+      var regex = tag2Input.delimiter.separator;
+      if ( regex && regex.test( this.value ) ) tag2Input._addTags(); 
+      tag2Input._calibrateInput();
+    };
+  }
+  
   var createInput = function( tag2Input, element,  hiddenSpan ) {
     var input; 
 
-    if ( element.nodeName === 'INPUT' ) { 
-      input = element;
-    }
+    if ( element.nodeName === 'INPUT' ) input = element;
     else input = document.createElement( 'input' );
 
     input.setAttribute('type', 'text');
     input.setAttribute('size', '1');
-    input.addEventListener( 'input', inputChange( tag2Input, hiddenSpan ), true );
-    input.addEventListener( 'paste', inputChange( tag2Input, hiddenSpan ), true );
-    input.addEventListener( 'keyup', function( e ) {
-      if ( e.which != 8 || this.value.length != 0 ) return;
-      tag2Input.pop();
+    input.addEventListener( 'input', inputChange( tag2Input ), true );
+    input.addEventListener( 'paste', inputChange( tag2Input ), true );
+    input.addEventListener( 'keydown', function( e ) {
+      if ( e.which === 8 && this.value.length === 0 ) tag2Input.pop();
+      else if ( tag2Input.delimiter.keycode.indexOf( e.which ) != -1 ) {
+        tag2Input._addTags();
+        tag2Input._calibrateInput();
+      }
     });
     return input;
   };
@@ -125,7 +129,7 @@ var TaggableInput = ( function() {
       content.addEventListener('keydown', function(e){
         if ( e.which === 8 && this.innerHTML.length === 1 ) this.parentNode.parentNode.removeChild(this.parentNode);
       });
-      ['keyup','mouseup','cut'].map( function( event ) { 
+      ['keyup','mouseup','cut'].forEach( function( event ) { 
         content.addEventListener( event, function(e){
           if( this.innerHTML.length == 0 ) this.parentNode.parentNode.removeChild(this.parentNode); 
         });
@@ -170,19 +174,17 @@ var TaggableInput = ( function() {
 
   var TaggableInput = function( container, opts ) {
     var opts = opts || {};
-    var hiddenSpan = createHiddenSpan();
-    this.delimiter = opts.delimiter  || defaultDelimiters;
-    this.delimiter = this.delimiter instanceof Array ?  this.delimiter : [ this.delimiter ];
-    this.delimiter = this.delimiter.map(function(item){ return item.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"); });
+    this.hiddenSpan = createHiddenSpan();
+    this.delimiter = parseDelimiters(  opts.delimiter );
     this.editable  = opts.editable != false;
     this.draggable = opts.draggable != false;
     this.removable = opts.removable != false;
-    this.input     = createInput( this, container,  hiddenSpan );
+    this.input     = createInput( this, container,  this.hiddenSpan );
     this.container = createContainer( container, this.input );
     if ( this.input.name ) this.name = this.input.name; 
     for ( var i in events ) this[ i ] = opts[ i ] || events[ i ];
 
-    build( this.container, this.input, hiddenSpan );
+    build( this.container, this.input, this.hiddenSpan );
   };
 
   TaggableInput.prototype = {
@@ -223,19 +225,14 @@ var TaggableInput = ( function() {
     _reset: function() {
       if ( this.name ) {
         var tags = this.tags();
-        console.log( tags );
         var newCache = {};
         for ( var i = 0; i < tags.length; i++ ) {
           var id              = tags[i].getAttribute( 'data-cid' );
-          console.log( id );
           newCache[ id ]      = inputCache[ id ];
           newCache[ id ].name = this.name + '[' + i + ']'; 
-          console.log( inputCache[ id ] );
           inputCache[ id ].parentNode.appendChild( inputCache[ id ] );
           delete inputCache[ id ];
         }
-        console.log( 'left' );
-        console.log( inputCache );
         for ( var key in inputCache ){
           if ( !inputCache.hasOwnProperty( key ) ) continue; 
           var value = inputCache[ key ];
@@ -243,25 +240,17 @@ var TaggableInput = ( function() {
         }
         inputCache = newCache;
       }
+    },
+    _addTags: function () {
+      var items = this.input.value.split( this.delimiter.separator );
+      if ( items[ items.length - 1 ].length === 0 ) items.pop();
+      this.add( items );
+      this.input.value = '';
+    },
+    _calibrateInput: function() {
+      this.hiddenSpan.innerText = this.input.value;
+      this.input.style.width = this.hiddenSpan.clientWidth + ( this.input.offsetWidth - this.input.clientWidth + 5 ) + 'px';
     }
-    //_addEventListeners: function() {
-    //  this.container
-    //  if ( taggableInput.draggable ) {
-    //    outer.setAttribute('draggable', 'true');
-    //    left.addEventListener ('dragenter', function (e) { e.preventDefault(); return true; });
-    //    right.addEventListener('dragenter', function (e) { e.preventDefault(); return true; });
-    //    left.addEventListener ('dragover' , function (e) { e.preventDefault(); return true; });
-    //    right.addEventListener('dragover' , function (e) { e.preventDefault(); return true; });
-    //  
-    //    left.addEventListener ('drop', dropCallback( true, taggableInput  ) );
-    //    right.addEventListener('drop', dropCallback( false, taggableInput ) );
-
-    //    outer.addEventListener('dragstart', function (e) {
-    //      e.dataTransfer.setData('item', this.id );
-    //      return true;
-    //    });  
-    //  }
-    //},
   }
   return TaggableInput;
 })();
