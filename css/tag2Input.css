@@ -5,72 +5,62 @@
   position: relative;
   cursor: text;
   font-size: 12px;
+  line-height: 2;
 }
 
-.taggable-input input { font-size: 12px; }
-
-.taggable-input .label {
+.taggable-input .taggable-label {
   margin-right: 5px;
-  margin-bottom: 5px;
-  font-weight: 500;
   letter-spacing: .7px;
-  display: inline-block;
-  font-size: 12.5px;
-  padding: 10px;
+  display: inline-table;
   position: relative;
   max-width: 100%;
-  height: 26px;
-  line-height: 23px;
-  padding: 0 10px 0 10px;
-  font-size: 12px;
   color: #555;
   text-decoration: none;
   text-shadow: 0 1px white;
   background: #fafafa;
-  border-width: 1px 1px 1px 1px;
-  border-style: solid;
+  border: 1px solid;
   border-color: #dadada #d2d2d2 #c5c5c5;
-  border-radius: 3px 3px 3px 3px;
+  border-radius: 3px;
   background-image: -webkit-linear-gradient(top, #fcfcfc, #f0f0f0);
   background-image: -moz-linear-gradient(top, #fcfcfc, #f0f0f0);
   background-image: -o-linear-gradient(top, #fcfcfc, #f0f0f0);
   background-image: linear-gradient(to bottom, #fcfcfc, #f0f0f0);
   -webkit-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 1px 2px rgba(0, 0, 0, 0.05);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 1px 2px rgba(0, 0, 0, 0.05);
+  margin-bottom: 5px;  
+  overflow: hidden;
 }
 
-.taggable-input .label span       { display: inline-block; }
-.taggable-input .label[draggable] { cursor: move; }
+.taggable-input .taggable-label span       {
+  display: table-cell;
+  min-width: 10px;
+ }
+
+ .taggable-input .taggable-label[draggable] { cursor: move; }
 
 .taggable-input input {
   outline: none;
   border: none;
   font-family: inherit;
+  font-size: inherit;
   max-width: 100% !important;
+  line-height: inherit;
 }
 
-.taggable-input .label .drop-left, 
-.taggable-input .label .drop-right {
-  position: absolute;
-  width: 10px;
-  left: 0; top: 0; bottom: 0;
-}
-
-.taggable-input .label .drop-right { right: 0; left: auto; }
-.taggable-input .label.close       { padding-right: 20px; }
-
-.taggable-input .label.close .drop-right {
-  width: 10px;
+.taggable-input .taggable-label.close .drop-side:last-of-type {
   cursor: pointer;
-  margin-right: 5px;
-}
-
-.taggable-input .label.close .drop-right:after {
-  position: absolute;
-  left: 0; right: 0; top: 0; bottom: 0;
-  content: 'x';
   text-align: center;
-  font-size: 80%;
+  min-width: 15px;
+  vertical-align: middle;
 }
 
-.taggable-input .label .content[contenteditable] { cursor: text; }
+.taggable-input .taggable-label.close .drop-side:last-of-type:after {
+  content: 'x';
+  font-size: 80%;
+  display: block;
+}
+
+.taggable-input .taggable-label .content[contenteditable] { 
+  cursor: text; 
+  display: inline-block;
+}

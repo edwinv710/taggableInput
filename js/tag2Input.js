@@ -1,7 +1,6 @@
 var TaggableInput = ( function() {
 
-  var containerClass = 'taggable-input';
-  var labelClass    =  'label';
+  var defaultClass     = { label: 'taggable-label', container: 'taggable-input' };
   var defaultDelimiter = { keycode: [ 13 ], separator: undefined };
 
   var inputCache = {};
@@ -12,14 +11,14 @@ var TaggableInput = ( function() {
   };
   
   var parseDelimiters = function ( del ) {
+    del           = [].concat.apply( [], [ del ] );
     var delimiter = { keycode: [], separator: [] };
-    if ( !( del instanceof Array ) ) del = [ del ];
-    for ( var i = 0; i < del; i++ ){
-      if ( typeof del[ i ] === 'number' )    delimiter.keycode.push( del[i] )
-      else if ( typeof del[i] === 'string' ) delimiter.separator.push( del[i] );
+    for ( var i = 0; i < del.length; i++ ){
+      if      ( typeof del[ i ] === 'number' ) delimiter.keycode.push( del[i] )
+      else if ( typeof del[i] === 'string'   ) delimiter.separator.push( del[i] );
     }
     if ( delimiter.keycode.length === 0 && delimiter.separator.length === 0 ) return defaultDelimiter; 
-    delimiter.separator = delimiter.sepatator.length ? new RegExp( delimiter.separator.join('|') ) : undefined;
+    delimiter.separator = delimiter.separator.length ? new RegExp( delimiter.separator.join('|') ) : defaultDelimiter.separator;
     return delimiter;
   };
 
@@ -31,7 +30,7 @@ var TaggableInput = ( function() {
       container = document.createElement( 'div' );
       input.parentNode.insertBefore( container, input );
     }
-    container.className = ' '+containerClass;
+    container.className = ' ' + defaultClass.container;
     container.onclick   = function( e ) {
       if ( e.target !== this ) return;
       input.focus();
@@ -100,8 +99,12 @@ var TaggableInput = ( function() {
 
   var dropCallback = function ( isLeft, taggableInput ) {
     return function(e) {
-      var item   = document.getElementById( e.dataTransfer.getData('item') );
+      var query  = '.' + defaultClass.label + '[data-cid="' +  e.dataTransfer.getData('item') + '"]';
+      console.log( query );
+      var item   = document.querySelector(query);
+      console.log( item );
       var parent = e.target.parentNode;
+      console.log(parent );
       var target = isLeft ? parent : parent.nextSibling;
       parent.parentNode.insertBefore( item, target );
       taggableInput._reset();
@@ -118,8 +121,7 @@ var TaggableInput = ( function() {
     var right   = document.createElement('span');
     
     outer.setAttribute ( 'data-cid', id ); 
-    outer.className = 'label close'
-    outer.id        = 'label-' + id;id 
+    outer.className = defaultClass.label+' close'
 
     content.innerText = item;
     content.className = 'content';
@@ -127,6 +129,7 @@ var TaggableInput = ( function() {
     if ( taggableInput.editable ) {
       content.setAttribute('contenteditable', true);
       content.addEventListener('keydown', function(e){
+        if ( e.which === 13 ) e.preventDefault();
         if ( e.which === 8 && this.innerHTML.length === 1 ) this.parentNode.parentNode.removeChild(this.parentNode);
       });
       ['keyup','mouseup','cut'].forEach( function( event ) { 
@@ -136,17 +139,15 @@ var TaggableInput = ( function() {
       });
     }
   
-    if ( taggableInput.removable ) {
+    if ( taggableInput.close ) {
       outer.className += ' close';
       right.addEventListener('click', function (e) {
         taggableInput.remove( this.parentNode ); 
       });
     }
 
-    left.className  = 'drop-left';
-    left.innerHTML  = '&nbsp;'
-    right.innerHTML = '&nbsp;'
-    right.className = 'drop-right';
+    left.className  = 'drop-side';
+    right.className = 'drop-side';
     
     outer.appendChild( left    );
     outer.appendChild( content );
@@ -163,7 +164,7 @@ var TaggableInput = ( function() {
       right.addEventListener('drop', dropCallback( false, taggableInput ) );
 
       outer.addEventListener('dragstart', function (e) {
-        e.dataTransfer.setData('item', this.id );
+        e.dataTransfer.setData('item', this.getAttribute( 'data-cid' ) );
         return true;
       });  
     }
@@ -175,12 +176,13 @@ var TaggableInput = ( function() {
   var TaggableInput = function( container, opts ) {
     var opts = opts || {};
     this.hiddenSpan = createHiddenSpan();
-    this.delimiter = parseDelimiters(  opts.delimiter );
-    this.editable  = opts.editable != false;
-    this.draggable = opts.draggable != false;
-    this.removable = opts.removable != false;
-    this.input     = createInput( this, container,  this.hiddenSpan );
-    this.container = createContainer( container, this.input );
+    this.delimiter  = parseDelimiters(  opts.delimiter );
+    this.editable   = opts.editable  != false;
+    this.draggable  = opts.draggable != false;
+    this.close      = opts.close     != false;
+    this.backspace  = opts.backspace != false;
+    this.input      = createInput( this, container,  this.hiddenSpan );
+    this.container  = createContainer( container, this.input );
     if ( this.input.name ) this.name = this.input.name; 
     for ( var i in events ) this[ i ] = opts[ i ] || events[ i ];
 
@@ -190,20 +192,20 @@ var TaggableInput = ( function() {
   TaggableInput.prototype = {
     add : function( labels ) {
       var length = this.tags().length;
-      labels = ( labels instanceof Array ) ? labels : [ labels ];
+      labels = [].concat.apply( [], [ labels ] );
       for ( var i = 0; i < labels.length; i++ ) {
         labels[i] = this.beforeInsert( labels[i] );
         labels[i] = createLabel( this, labels[i] );
-        this.container.insertBefore( labels[i] , this.input);
+        this.container.insertBefore( labels[i] , this.input );
         this.afterInsert( labels[i] );
-        if ( this.name ) { 
-          var hiddenInput = createHiddenInput( this.name, length, labels[i] );
-          this.container.appendChild( hiddenInput );
-        } 
+        if ( !this.name ) continue;
+        var hiddenInput = createHiddenInput( this.name, length, labels[i] );
+        this.container.appendChild( hiddenInput );
       }
     },
     remove : function( label ) {
       if ( typeof label === 'number' ) label = this.tags( label );
+      if ( !label ) return;
       label.parentNode.removeChild( label );
       this._reset();
       return label;
@@ -213,7 +215,7 @@ var TaggableInput = ( function() {
       return label; 
     },
     tags: function( index ) {
-      var tags = this.container.getElementsByClassName( labelClass );
+      var tags = this.container.getElementsByClassName( defaultClass.label );
       if ( !index ) return tags;
       index = ( tags.length + index ) % tags.length;
       return tags[index];

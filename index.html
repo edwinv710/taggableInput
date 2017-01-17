@@ -65,8 +65,10 @@
     var form        = document.forms[0];
     var formInput   = document.querySelector('input[name=interests]'); 
     var basicTaggbleInput  = new TaggableInput ( 'example-input', {});
-    var formTaggbleInput   = new TaggableInput ( formInput );
-    
+    var formTaggbleInput   = new TaggableInput ( formInput, {
+      delimiter: [ ' ', ',' ]
+    } );
+
     var payload = function() {
       var load = {};
       for ( var i = 0; i < form.elements.length - 1; i++ )
