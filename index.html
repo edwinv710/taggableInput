@@ -33,6 +33,17 @@
       white-space: pre;
 
     }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .form-group label {
+      margin-right: 10px;
+    }
+    .form-group > * {
+      margin-bottom: 5px;
+    }
+
+    
   </style>
   <!--[if lt IE 9]>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
@@ -49,15 +60,24 @@
     <h4> Form Example </h4>
     <p> A basic form example. Unpon clicking submit, the form's payload will be printed below. </p>
     <form>
-      <label for='name'> Name: </label>
-      <input name=name type=text value='Jon Snow' />
-      <label for=interests> Interests: </label>
-      <input name=interests type=text />
-      <input type=submit />
+      <div class='form-group'>
+        <label for='name'> Name: </label>
+        <input name=name type=text value='Jon Snow' />
+      </div>
+      <div class='form-group'>
+        <label for=interests> Interests: </label>
+        <input name=interests type=text />
+      </div>
+      <div class='form-group'>
+        <input type=submit />
+      </div>
     </form>
     <h4> Results </h4>
     <p class='payload'>
     </p>
+    <h4> Tag Example </h4>
+    <div class=taggable-input data-close=false > </div>
+    <input class=taggable-input data-draggable=false data-values="this,is,cool" />
   </section>
   <script src="js/tag2Input.js"></script>
   <script>

@@ -45,6 +45,7 @@
   font-size: inherit;
   max-width: 100% !important;
   line-height: inherit;
+  margin-bottom: 5px;
 }
 
 .taggable-input .taggable-label.close .drop-side:last-of-type {

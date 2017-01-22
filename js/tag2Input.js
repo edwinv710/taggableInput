@@ -9,6 +9,23 @@ var TaggableInput = ( function() {
     beforeInsert : function ( text, index ) { return text; },
     afterInsert  : function ( label, index, text ) { }
   };
+   
+  var embedTaggableInput = function(){
+    var elements = document.querySelectorAll('.taggable-input:not([data-complete="true"])');
+    for ( var i = 0; i < elements.length; i++ ) {
+      var attributes = [].reduce.apply(  elements[ i ].attributes, [ function( obj, attr ) {
+        if ( attr.name.includes( 'data-' ) ) obj[ attr.name.replace('data-', '') ]  = attr.value;
+        return obj;
+      }, {} ]);
+      var taggableInput  =  new TaggableInput( elements[i], attributes ); 
+      
+    }
+  }
+
+  var parseValues    = function ( val ) {
+    if ( typeof val === 'string' ) val  = val.split(',');
+    return val;
+  }
   
   var parseDelimiters = function ( del ) {
     del           = [].concat.apply( [], [ del ] );
@@ -31,6 +48,8 @@ var TaggableInput = ( function() {
       input.parentNode.insertBefore( container, input );
     }
     container.className = ' ' + defaultClass.container;
+    container.id = container.id || Math.random().toString(36).substring( 2, 18 ).toUpperCase();
+    container.dataset.complete = true;
     container.onclick   = function( e ) {
       if ( e.target !== this ) return;
       input.focus();
@@ -56,9 +75,10 @@ var TaggableInput = ( function() {
   var createHiddenInput = function( name, index, label) {
     var input = document.createElement( 'input' );
     var id    = label.getAttribute( 'data-cid' );
+    var text  = label.getElementsByClassName('content')[0].innerText;
     input.setAttribute( 'type', 'hidden' );
     input.name  = name+'['+index+']';
-    input.value = label.innerText;
+    input.value = text; 
     inputCache[ id ] = input; 
     return input;
   }
@@ -77,6 +97,7 @@ var TaggableInput = ( function() {
     if ( element.nodeName === 'INPUT' ) input = element;
     else input = document.createElement( 'input' );
 
+    input.className = input.className.replace(/(^| +)+taggable-input($| +)+/, ' ')
     input.setAttribute('type', 'text');
     input.setAttribute('size', '1');
     input.addEventListener( 'input', inputChange( tag2Input ), true );
@@ -100,11 +121,8 @@ var TaggableInput = ( function() {
   var dropCallback = function ( isLeft, taggableInput ) {
     return function(e) {
       var query  = '.' + defaultClass.label + '[data-cid="' +  e.dataTransfer.getData('item') + '"]';
-      console.log( query );
       var item   = document.querySelector(query);
-      console.log( item );
       var parent = e.target.parentNode;
-      console.log(parent );
       var target = isLeft ? parent : parent.nextSibling;
       parent.parentNode.insertBefore( item, target );
       taggableInput._reset();
@@ -130,7 +148,13 @@ var TaggableInput = ( function() {
       content.setAttribute('contenteditable', true);
       content.addEventListener('keydown', function(e){
         if ( e.which === 13 ) e.preventDefault();
-        if ( e.which === 8 && this.innerHTML.length === 1 ) this.parentNode.parentNode.removeChild(this.parentNode);
+        else if ( e.which === 8 && this.innerHTML.length === 1 ) 
+          this.parentNode.parentNode.removeChild(this.parentNode);
+      });
+      content.addEventListener('blur', function(e) {
+        var id      = this.parentNode.getAttribute( 'data-cid' );
+        var input   = inputCache[ id ]; 
+        input.value = this.innerText;
       });
       ['keyup','mouseup','cut'].forEach( function( event ) { 
         content.addEventListener( event, function(e){
@@ -174,7 +198,8 @@ var TaggableInput = ( function() {
   };  
 
   var TaggableInput = function( container, opts ) {
-    var opts = opts || {};
+    var opts   = opts || {};
+    var values = parseValues( opts.values );
     this.hiddenSpan = createHiddenSpan();
     this.delimiter  = parseDelimiters(  opts.delimiter );
     this.editable   = opts.editable  != false;
@@ -183,10 +208,13 @@ var TaggableInput = ( function() {
     this.backspace  = opts.backspace != false;
     this.input      = createInput( this, container,  this.hiddenSpan );
     this.container  = createContainer( container, this.input );
+    this.id         = this.container.id;
     if ( this.input.name ) this.name = this.input.name; 
     for ( var i in events ) this[ i ] = opts[ i ] || events[ i ];
 
     build( this.container, this.input, this.hiddenSpan );
+    TaggableInput.elements[ this.id ] = this;
+    this.add ( values );
   };
 
   TaggableInput.prototype = {
@@ -194,6 +222,7 @@ var TaggableInput = ( function() {
       var length = this.tags().length;
       labels = [].concat.apply( [], [ labels ] );
       for ( var i = 0; i < labels.length; i++ ) {
+        if ( ! ( typeof labels[i] === 'string' && labels[i].length ) ) continue;
         labels[i] = this.beforeInsert( labels[i] );
         labels[i] = createLabel( this, labels[i] );
         this.container.insertBefore( labels[i] , this.input );
@@ -254,5 +283,12 @@ var TaggableInput = ( function() {
       this.input.style.width = this.hiddenSpan.clientWidth + ( this.input.offsetWidth - this.input.clientWidth + 5 ) + 'px';
     }
   }
+
+  TaggableInput.elements = {};
+  window.onload = function(){
+    embedTaggableInput(); 
+  }
+
   return TaggableInput;
 })();
+
