@@ -1,20 +1,79 @@
 var TaggableInput = ( function() {
 
-  var defaultClass     = { label: 'taggable-label', container: 'taggable-input' };
+  var defaults = {
+    labelClass          : 'simple',
+    labelContainerClass : 'taggable-label',
+    containerClass      : 'taggable-input',
+    close               : '<span>x</span>'
+  };
+  
   var defaultDelimiter = { keycode: [ 13 ], separator: undefined };
 
-  var inputCache = {};
+  var inputCache    = {};
+  var booleanValues = {
+    true:  [ 't', 'true' , '1', 1, true  ],
+    false: [ 'f', 'false', '0', 0, false ]
+  }
   
   var events = {
     beforeInsert : function ( text, index ) { return text; },
     afterInsert  : function ( label, index, text ) { }
   };
+
+  var createElementFromString = function( element ) {
+    console.log( element );
+    if ( element instanceof HTMLElement ) return element;
+    var parent = document.createElement('div');
+    parent.innerHTML = element;
+    console.log( parent );
+    return parent.childNodes[0];
+  };
+
+  var attachDragListeners = function ( taggableInput ) {
+    var dragged;
+    var reference;
+    
+    taggableInput.container.addEventListener("dragstart", function( event ) {
+      dragged   = event.target;
+      reference = dragged.nextSibling;
+      dragged.style.opacity = .7;
+    }, false);
+
+    taggableInput.container.addEventListener("dragend", function( event ) {
+      dragged.style.opacity = "";
+      dragged = undefined;
+      reference = undefined;
+      taggableInput._reset();
+    }, false);
+
+    taggableInput.container.addEventListener("dragenter", function( event ) {
+      if ( !dragged ) return;
+      if( !taggableInput.container.contains(event.target) )  
+        dragged.parentNode.insertBefore( dragged, reference );
+      else if ( event.target.className.includes("ti-label-drop") && !event.target.previousElementSibling ) 
+        event.target.parentNode.parentNode.insertBefore( dragged, event.target.parentNode);
+      else if ( event.target.className.includes("ti-label-drop") )
+        event.target.parentNode.parentNode.insertBefore( dragged, event.target.parentNode.nextSibling);
+    }, false);
+
+    taggableInput.container.addEventListener("dragleave", function( event ) {
+      if ( !dragged ) return;
+      if ( taggableInput.container === event.target ) dragged.parentNode.insertBefore( dragged, reference );
+    }, false);
+    
+    taggableInput.container.addEventListener("drop", function( event ) {
+      event.preventDefault();
+    }, false);
+  };
    
   var embedTaggableInput = function(){
-    var elements = document.querySelectorAll('.taggable-input:not([data-complete="true"])');
+    var elements = document.querySelectorAll('.'+defaults.containerClass+':not([data-complete="true"])');
     for ( var i = 0; i < elements.length; i++ ) {
       var attributes = [].reduce.apply(  elements[ i ].attributes, [ function( obj, attr ) {
-        if ( attr.name.includes( 'data-' ) ) obj[ attr.name.replace('data-', '') ]  = attr.value;
+        if ( attr.name.includes( 'data-' ) )
+          obj[ attr.name.replace('data-', '').replace(/(\-\w)/, function ( matches ) {
+            return matches[1].toUpperCase() 
+          } ) ]  = attr.value;
         return obj;
       }, {} ]);
       var taggableInput  =  new TaggableInput( elements[i], attributes ); 
@@ -47,7 +106,7 @@ var TaggableInput = ( function() {
       container = document.createElement( 'div' );
       input.parentNode.insertBefore( container, input );
     }
-    container.className = ' ' + defaultClass.container;
+    container.className = ' ' + defaults.containerClass;
     container.id = container.id || Math.random().toString(36).substring( 2, 18 ).toUpperCase();
     container.dataset.complete = true;
     container.onclick   = function( e ) {
@@ -75,7 +134,7 @@ var TaggableInput = ( function() {
   var createHiddenInput = function( name, index, label) {
     var input = document.createElement( 'input' );
     var id    = label.getAttribute( 'data-cid' );
-    var text  = label.getElementsByClassName('content')[0].innerText;
+    var text  = label.getElementsByClassName('ti-label-content')[0].innerText;
     input.setAttribute( 'type', 'hidden' );
     input.name  = name+'['+index+']';
     input.value = text; 
@@ -118,100 +177,78 @@ var TaggableInput = ( function() {
     input.removeAttribute('name');
   };
 
-  var dropCallback = function ( isLeft, taggableInput ) {
-    return function(e) {
-      var query  = '.' + defaultClass.label + '[data-cid="' +  e.dataTransfer.getData('item') + '"]';
-      var item   = document.querySelector(query);
-      var parent = e.target.parentNode;
-      var target = isLeft ? parent : parent.nextSibling;
-      parent.parentNode.insertBefore( item, target );
-      taggableInput._reset();
-      e.stopPropagation();
-      return false;
-    }
-  }
+  var addEditableListeners = function ( content ) {
+    content.setAttribute('contenteditable', true);
+    content.addEventListener('keydown', function(e){
+      if ( e.which === 13 ) e.preventDefault();
+      else if ( e.which === 8 && this.innerText.length === 1 ) 
+        this.parentNode.parentNode.parentNode.removeChild(this.parentNode);
+    });
+    content.addEventListener('blur', function(e) {
+      var id      = this.parentNode.parentNode.getAttribute( 'data-cid' );
+      var input   = inputCache[ id ]; 
+      input.value = this.innerText;
+    });
+    ['keyup','mouseup','cut'].forEach( function( event ) { 
+      content.addEventListener( event, function(e){
+        if( this.innerHTML.length == 0 ) this.parentNode.parentNode.removeChild(this.parentNode); 
+      });
+    });
+  };
+
+  var addCloseListeners = function ( taggableInput, labelBody ) {
+    var closeNode = document.createElement( 'div' );
+    closeNode.className = 'ti-label-close';
+    closeNode.appendChild( taggableInput.closeElement.cloneNode(true) );
+    closeNode.addEventListener('click', function (e) {
+      taggableInput.remove( labelBody.parentNode ); 
+    });
+    labelBody.appendChild( closeNode );
+  };
 
   var createLabel = function( taggableInput, item ) {
-    var id      = Math.random().toString(36).substr(2, 18).toUpperCase();
-    var outer   = document.createElement('div' );
-    var left    = document.createElement('span');
-    var content = document.createElement('span');
-    var right   = document.createElement('span');
+    var id          = Math.random().toString(36).substr(2, 18).toUpperCase();
+    var label       = document.createElement('div');
+    label.className = defaults.labelContainerClass;
+    label.innerHTML = "<div class='ti-label-drop'></div>"      + 
+                      "<div class='ti-label-body'>"            +
+                        "<div class='ti-label-content'></div>" +
+                      "</div>"                                 +
+                      "<div class='ti-label-drop'></div>"
+    label.setAttribute ( 'data-cid', id ); 
     
-    outer.setAttribute ( 'data-cid', id ); 
-    outer.className = defaultClass.label+' close'
-
+    var content = label.getElementsByClassName('ti-label-content')[0];
     content.innerText = item;
-    content.className = 'content';
+    content.parentNode.className += ' '+taggableInput.labelClass;
     
-    if ( taggableInput.editable ) {
-      content.setAttribute('contenteditable', true);
-      content.addEventListener('keydown', function(e){
-        if ( e.which === 13 ) e.preventDefault();
-        else if ( e.which === 8 && this.innerHTML.length === 1 ) 
-          this.parentNode.parentNode.removeChild(this.parentNode);
-      });
-      content.addEventListener('blur', function(e) {
-        var id      = this.parentNode.getAttribute( 'data-cid' );
-        var input   = inputCache[ id ]; 
-        input.value = this.innerText;
-      });
-      ['keyup','mouseup','cut'].forEach( function( event ) { 
-        content.addEventListener( event, function(e){
-          if( this.innerHTML.length == 0 ) this.parentNode.parentNode.removeChild(this.parentNode); 
-        });
-      });
-    }
-  
-    if ( taggableInput.close ) {
-      outer.className += ' close';
-      right.addEventListener('click', function (e) {
-        taggableInput.remove( this.parentNode ); 
-      });
-    }
-
-    left.className  = 'drop-side';
-    right.className = 'drop-side';
-    
-    outer.appendChild( left    );
-    outer.appendChild( content );
-    outer.appendChild( right   );
-
+    if ( taggableInput.editable ) addEditableListeners ( content ); 
+    if ( taggableInput.close    ) addCloseListeners    ( taggableInput, content.parentNode );
     if ( taggableInput.draggable ) {
-      outer.setAttribute('draggable', 'true');
-      left.addEventListener ('dragenter', function (e) { e.preventDefault(); return true; });
-      right.addEventListener('dragenter', function (e) { e.preventDefault(); return true; });
-      left.addEventListener ('dragover' , function (e) { e.preventDefault(); return true; });
-      right.addEventListener('dragover' , function (e) { e.preventDefault(); return true; });
-    
-      left.addEventListener ('drop', dropCallback( true, taggableInput  ) );
-      right.addEventListener('drop', dropCallback( false, taggableInput ) );
-
-      outer.addEventListener('dragstart', function (e) {
-        e.dataTransfer.setData('item', this.getAttribute( 'data-cid' ) );
-        return true;
-      });  
+      label.setAttribute('draggable', 'true'); 
     }
-    
 
-    return outer;
+    return label;
   };  
 
   var TaggableInput = function( container, opts ) {
     var opts   = opts || {};
-    var values = parseValues( opts.values );
-    this.hiddenSpan = createHiddenSpan();
-    this.delimiter  = parseDelimiters(  opts.delimiter );
-    this.editable   = opts.editable  != false;
-    this.draggable  = opts.draggable != false;
-    this.close      = opts.close     != false;
-    this.backspace  = opts.backspace != false;
-    this.input      = createInput( this, container,  this.hiddenSpan );
-    this.container  = createContainer( container, this.input );
-    this.id         = this.container.id;
-    if ( this.input.name ) this.name = this.input.name; 
-    for ( var i in events ) this[ i ] = opts[ i ] || events[ i ];
+    opts.label = opts.label || {};
 
+    var values = parseValues( opts.values );
+    this.labelClass   = opts.label.klass || opts.labelKlass ||  defaults.labelClass;
+    this.closeElement = createElementFromString( opts.label.close || opts.labelClose ||  defaults.close );
+    this.hiddenSpan  = createHiddenSpan();
+    this.delimiter   = parseDelimiters(  opts.delimiter );
+    this.editable    = !booleanValues.false.includes( opts.editable );
+    this.draggable   = !booleanValues.false.includes( opts.draggable );
+    this.close       = !booleanValues.false.includes( opts.close );
+    this.backspace   = !booleanValues.false.includes( opts.backspace );
+    this.input       = createInput( this, container,  this.hiddenSpan );
+    this.container   = createContainer( container, this.input );
+    this.id          = this.container.id;
+    if  ( this.draggable  ) attachDragListeners( this );
+    if  ( this.input.name ) this.name = this.input.name; 
+    for ( var i in events ) this[ i ] = opts[ i ] || events[ i ];
     build( this.container, this.input, this.hiddenSpan );
     TaggableInput.elements[ this.id ] = this;
     this.add ( values );
@@ -244,7 +281,7 @@ var TaggableInput = ( function() {
       return label; 
     },
     tags: function( index ) {
-      var tags = this.container.getElementsByClassName( defaultClass.label );
+      var tags = this.container.getElementsByClassName( defaults.labelContainerClass );
       if ( !index ) return tags;
       index = ( tags.length + index ) % tags.length;
       return tags[index];
