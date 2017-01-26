@@ -13,7 +13,7 @@ var TaggableInput = ( function() {
   var booleanValues = {
     true:  [ 't', 'true' , '1', 1, true  ],
     false: [ 'f', 'false', '0', 0, false ]
-  }
+  };
   
   var events = {
     beforeInsert : function ( text, index ) { return text; },
@@ -237,20 +237,22 @@ var TaggableInput = ( function() {
     var values = parseValues( opts.values );
     this.labelClass   = opts.label.klass || opts.labelKlass ||  defaults.labelClass;
     this.closeElement = createElementFromString( opts.label.close || opts.labelClose ||  defaults.close );
-    this.hiddenSpan  = createHiddenSpan();
-    this.delimiter   = parseDelimiters(  opts.delimiter );
-    this.editable    = !booleanValues.false.includes( opts.editable );
-    this.draggable   = !booleanValues.false.includes( opts.draggable );
-    this.close       = !booleanValues.false.includes( opts.close );
-    this.backspace   = !booleanValues.false.includes( opts.backspace );
-    this.input       = createInput( this, container,  this.hiddenSpan );
-    this.container   = createContainer( container, this.input );
-    this.id          = this.container.id;
+    this.hiddenSpan   = createHiddenSpan();
+    this.delimiter    = parseDelimiters(  opts.delimiter );
+    this.editable     = !booleanValues.false.includes( opts.editable );
+    this.draggable    = !booleanValues.false.includes( opts.draggable );
+    this.close        = !booleanValues.false.includes( opts.close );
+    this.backspace    = !booleanValues.false.includes( opts.backspace );
+    this.input        = createInput( this, container,  this.hiddenSpan );
+    this.container    = createContainer( container, this.input );
+    this.id           = this.container.id;
+
     if  ( this.draggable  ) attachDragListeners( this );
     if  ( this.input.name ) this.name = this.input.name; 
     for ( var i in events ) this[ i ] = opts[ i ] || events[ i ];
-    build( this.container, this.input, this.hiddenSpan );
-    TaggableInput.elements[ this.id ] = this;
+
+    build ( this.container, this.input, this.hiddenSpan );
+    TaggableInput.elements [ this.id ] = this;
     this.add ( values );
   };
 
