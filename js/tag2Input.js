@@ -21,11 +21,9 @@ var TaggableInput = ( function() {
   };
 
   var createElementFromString = function( element ) {
-    console.log( element );
     if ( element instanceof HTMLElement ) return element;
     var parent = document.createElement('div');
     parent.innerHTML = element;
-    console.log( parent );
     return parent.childNodes[0];
   };
 
@@ -36,11 +34,11 @@ var TaggableInput = ( function() {
     taggableInput.container.addEventListener("dragstart", function( event ) {
       dragged   = event.target;
       reference = dragged.nextSibling;
-      dragged.style.opacity = .7;
+      dragged.className += ' active';
     }, false);
 
     taggableInput.container.addEventListener("dragend", function( event ) {
-      dragged.style.opacity = "";
+      dragged.className = dragged.className.replace( /(^|\s)active/, '' );
       dragged = undefined;
       reference = undefined;
       taggableInput._reset();
@@ -48,7 +46,7 @@ var TaggableInput = ( function() {
 
     taggableInput.container.addEventListener("dragenter", function( event ) {
       if ( !dragged ) return;
-      if( !taggableInput.container.contains(event.target) )  
+      if ( !taggableInput.container.contains(event.target) )  
         dragged.parentNode.insertBefore( dragged, reference );
       else if ( event.target.className.includes("ti-label-drop") && !event.target.previousElementSibling ) 
         event.target.parentNode.parentNode.insertBefore( dragged, event.target.parentNode);
@@ -70,19 +68,18 @@ var TaggableInput = ( function() {
     var elements = document.querySelectorAll('.'+defaults.containerClass+':not([data-complete="true"])');
     for ( var i = 0; i < elements.length; i++ ) {
       var attributes = [].reduce.apply(  elements[ i ].attributes, [ function( obj, attr ) {
-        if ( attr.name.includes( 'data-' ) )
+        if ( !attr.name.includes( 'data-' ) )
           obj[ attr.name.replace('data-', '').replace(/(\-\w)/, function ( matches ) {
             return matches[1].toUpperCase() 
           } ) ]  = attr.value;
         return obj;
       }, {} ]);
       var taggableInput  =  new TaggableInput( elements[i], attributes ); 
-      
     }
   }
 
-  var parseValues    = function ( val ) {
-    if ( typeof val === 'string' ) val  = val.split(',');
+  var parseValues = function ( val ) {
+    if ( typeof val === 'string' ) val = val.split(',');
     return val;
   }
   

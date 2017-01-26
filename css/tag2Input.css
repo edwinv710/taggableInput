@@ -29,6 +29,10 @@
   padding: 0 0.5em 0 0.5em;
 }
 
+.taggable-input .taggable-label.active {
+  opacity: 0.7;
+}
+
 .taggable-input .taggable-label .ti-label-body.simple {  
   letter-spacing: 0.07em;
   text-shadow: 0 0.1em white;
@@ -50,11 +54,6 @@
   z-index: 1;
   margin: 0 auto;
 }
-
-/*.taggable-input .taggable-label span       {
-  display: table-cell;
-  min-width: 10px;
- }*/
 
  .taggable-input .taggable-label[draggable] { cursor: move; }
 
@@ -78,19 +77,6 @@
 .taggable-input .taggable-label .ti-label-body .ti-label-close span {  
   font-size: 80%;
 }
-
-/*.taggable-input .taggable-label.close .drop-side:last-of-type {
-  cursor: pointer;
-  text-align: center;
-  min-width: 15px;
-  vertical-align: middle;
-}
-
-.taggable-input .taggable-label.close .drop-side:last-of-type:after {
-  content: 'x';
-  font-size: 80%;
-  display: block;
-}*/
 
 .taggable-input .taggable-label .ti-label-body .ti-label-content {  
   line-height: 1;
