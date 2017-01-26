@@ -1,11 +1,17 @@
 ## TaggableInput
 
-Taggable Input allows for the seamless creation of tags directly from an input field. To see it in action, visit the demo on [CodePen] (https://codepen.io/recursiveEd/pen/KNbLKN).
+TaggableInput allows for the seamless creation of tags directly from an input field. To see it in action, visit the demo on [CodePen] (https://codepen.io/recursiveEd/pen/KNbLKN).
 
 ### Getting Started
 
+TaggableInputs can be created by ejther adding options as data attributes directly on an HTML element of the class `taggable-unput` or through the javascript api. 
+
+``` html
+  <div class='taggable-input' data-delimiter data-editable data-draggable data-removable data-close >
+```
+
 ``` javascript
-  new TaggableInput ( container, { delimiter, editable, draggable, removable } );
+  new TaggableInput ( container, { delimiter, editable, draggable, removable , close, close} );
 ```
 * **container** ( required ) - An **HTMLElement** or a **string** containing the Id of the DOM element where the input will append.
 * **delimiter** ( optional ) - A string or an array of string that, upon typing, triggers the creating of a tag. The default value is **' '**.
@@ -19,6 +25,10 @@ Taggable Input allows for the seamless creation of tags directly from an input f
     draggable: false
   });
 ```
+
+``` html
+  <div class='taggable-input' data-removable=false data-draggable=false ></div>
+``` 
 
 ### Methods
 
@@ -85,6 +95,14 @@ Taggable Input allows for the seamless creation of tags directly from an input f
 ``` javascript 
   taggableInput.tags();
 ```
+## Using TaggableInputs with forms
+
+To embed TaggableInputs into forms add an input input with the class `taggable-input` and a name attribute. The library will use that inpit field to contruct the taggable input. Each tag added will c4eate a hidden input field usimg the name given to the textbox. Each tag will create a hidden input field using the name attribute associated with the input The index associated with the input correlate with the order of the tags.
+
+```html
+  <input type=text name=foo class=taggable-input values='foo1,foo2,foo3' /> 
+```
+
 
 ## Contributing
 
