@@ -1,31 +1,43 @@
 var TaggableInput = ( function() {
 
   var defaults = {
-    labelClass          : 'simple',
-    labelContainerClass : 'taggable-label',
-    containerClass      : 'taggable-input',
-    close               : '<span>x</span>'
+    tagClass          : 'simple',
+    tagContainerClass : 'ti-tag',
+    containerClass    : 'taggable-input',
+    close             : '<span>x</span>',
+    delimiters        : { keycode: [ 13 ], separator: undefined },
+    booleans          : {
+      true:  [ 't', 'true' , '1', 1, true  ],
+      false: [ 'f', 'false', '0', 0, false ]
+    },
+    events            : {
+      beforeInsert : function ( text ) { return text; },
+      afterInsert  : function ( tag, text, index ) { }
+    }
   };
   
-  var defaultDelimiter = { keycode: [ 13 ], separator: undefined };
-
   var inputCache    = {};
-  var booleanValues = {
-    true:  [ 't', 'true' , '1', 1, true  ],
-    false: [ 'f', 'false', '0', 0, false ]
-  };
   
-  var events = {
-    beforeInsert : function ( text, index ) { return text; },
-    afterInsert  : function ( label, index, text ) { }
-  };
-
   var createElementFromString = function( element ) {
     if ( element instanceof HTMLElement ) return element;
     var parent = document.createElement('div');
     parent.innerHTML = element;
     return parent.childNodes[0];
   };
+
+  var createTagElement = function ( text ) {
+    var id        = Math.random().toString(36).substr(2, 18).toUpperCase();
+    var tag       = document.createElement('div');
+    tag.className = defaults.tagContainerClass;
+    tag.innerHTML = "<div class='ti-tag-drop'></div>"        + 
+                      "<div class='ti-tag-body'>"            +
+                        "<div class='ti-tag-content'>"+text+"</div>" +
+                      "</div>"                               +
+                      "<div class='ti-tag-drop'></div>"
+    tag.setAttribute ( 'data-cid', id ); 
+    
+    return tag;
+  }
 
   var attachDragListeners = function ( taggableInput ) {
     var dragged;
@@ -48,9 +60,9 @@ var TaggableInput = ( function() {
       if ( !dragged ) return;
       if ( !taggableInput.container.contains(event.target) )  
         dragged.parentNode.insertBefore( dragged, reference );
-      else if ( event.target.className.includes("ti-label-drop") && !event.target.previousElementSibling ) 
+      else if ( event.target.className.includes("ti-tag-drop") && !event.target.previousElementSibling ) 
         event.target.parentNode.parentNode.insertBefore( dragged, event.target.parentNode);
-      else if ( event.target.className.includes("ti-label-drop") )
+      else if ( event.target.className.includes("ti-tag-drop") )
         event.target.parentNode.parentNode.insertBefore( dragged, event.target.parentNode.nextSibling);
     }, false);
 
@@ -76,12 +88,12 @@ var TaggableInput = ( function() {
       }, {} ]);
       var taggableInput  =  new TaggableInput( elements[i], attributes ); 
     }
-  }
+  };
 
   var parseValues = function ( val ) {
     if ( typeof val === 'string' ) val = val.split(',');
     return val;
-  }
+  };
   
   var parseDelimiters = function ( del ) {
     del           = [].concat.apply( [], [ del ] );
@@ -90,8 +102,8 @@ var TaggableInput = ( function() {
       if      ( typeof del[ i ] === 'number' ) delimiter.keycode.push( del[i] )
       else if ( typeof del[i] === 'string'   ) delimiter.separator.push( del[i] );
     }
-    if ( delimiter.keycode.length === 0 && delimiter.separator.length === 0 ) return defaultDelimiter; 
-    delimiter.separator = delimiter.separator.length ? new RegExp( delimiter.separator.join('|') ) : defaultDelimiter.separator;
+    if ( delimiter.keycode.length === 0 && delimiter.separator.length === 0 ) return defaults.delimiters; 
+    delimiter.separator = delimiter.separator.length ? new RegExp( delimiter.separator.join('|') ) : defaults.delimiters.separator;
     return delimiter;
   };
 
@@ -128,16 +140,16 @@ var TaggableInput = ( function() {
     return span;
   };
 
-  var createHiddenInput = function( name, index, label) {
+  var createHiddenInput = function( name, index, tag) {
     var input = document.createElement( 'input' );
-    var id    = label.getAttribute( 'data-cid' );
-    var text  = label.getElementsByClassName('ti-label-content')[0].innerText;
+    var id    = tag.getAttribute( 'data-cid' );
+    var text  = tag.getElementsByClassName('ti-tag-content')[0].innerText;
     input.setAttribute( 'type', 'hidden' );
     input.name  = name+'['+index+']';
     input.value = text; 
     inputCache[ id ] = input; 
     return input;
-  }
+  };
 
   var inputChange = function ( tag2Input ) {
     return function( e ) {
@@ -145,7 +157,7 @@ var TaggableInput = ( function() {
       if ( regex && regex.test( this.value ) ) tag2Input._addTags(); 
       tag2Input._calibrateInput();
     };
-  }
+  };
   
   var createInput = function( tag2Input, element,  hiddenSpan ) {
     var input; 
@@ -170,21 +182,21 @@ var TaggableInput = ( function() {
 
   var build = function ( container, input, hiddenSpan ) {
     container.appendChild( hiddenSpan );
-    container.appendChild( input );
-    input.removeAttribute('name');
+    container.appendChild( input      );
+    input.removeAttribute( 'name'     );
   };
 
   var addEditableListeners = function ( content ) {
-    content.setAttribute('contenteditable', true);
-    content.addEventListener('keydown', function(e){
+    content.setAttribute( 'contenteditable', true );
+    content.addEventListener( 'keydown', function(e) {
       if ( e.which === 13 ) e.preventDefault();
       else if ( e.which === 8 && this.innerText.length === 1 ) 
         this.parentNode.parentNode.parentNode.removeChild(this.parentNode);
     });
-    content.addEventListener('blur', function(e) {
+    content.addEventListener( 'blur', function(e) {
       var id      = this.parentNode.parentNode.getAttribute( 'data-cid' );
       var input   = inputCache[ id ]; 
-      input.value = this.innerText;
+      if( input )input.value = this.innerText;
     });
     ['keyup','mouseup','cut'].forEach( function( event ) { 
       content.addEventListener( event, function(e){
@@ -193,60 +205,37 @@ var TaggableInput = ( function() {
     });
   };
 
-  var addCloseListeners = function ( taggableInput, labelBody ) {
+  var addCloseListeners = function ( taggableInput, tagBody ) {
     var closeNode = document.createElement( 'div' );
-    closeNode.className = 'ti-label-close';
+    closeNode.className = 'ti-tag-close';
     closeNode.appendChild( taggableInput.closeElement.cloneNode(true) );
     closeNode.addEventListener('click', function (e) {
-      taggableInput.remove( labelBody.parentNode ); 
+      taggableInput.remove( tagBody.parentNode ); 
     });
-    labelBody.appendChild( closeNode );
+    tagBody.appendChild( closeNode );
   };
 
-  var createLabel = function( taggableInput, item ) {
-    var id          = Math.random().toString(36).substr(2, 18).toUpperCase();
-    var label       = document.createElement('div');
-    label.className = defaults.labelContainerClass;
-    label.innerHTML = "<div class='ti-label-drop'></div>"      + 
-                      "<div class='ti-label-body'>"            +
-                        "<div class='ti-label-content'></div>" +
-                      "</div>"                                 +
-                      "<div class='ti-label-drop'></div>"
-    label.setAttribute ( 'data-cid', id ); 
-    
-    var content = label.getElementsByClassName('ti-label-content')[0];
-    content.innerText = item;
-    content.parentNode.className += ' '+taggableInput.labelClass;
-    
-    if ( taggableInput.editable ) addEditableListeners ( content ); 
-    if ( taggableInput.close    ) addCloseListeners    ( taggableInput, content.parentNode );
-    if ( taggableInput.draggable ) {
-      label.setAttribute('draggable', 'true'); 
-    }
-
-    return label;
-  };  
-
   var TaggableInput = function( container, opts ) {
-    var opts   = opts || {};
-    opts.label = opts.label || {};
+    var opts = opts     || {};
+    opts.tag = opts.tag || {};
 
-    var values = parseValues( opts.values );
-    this.labelClass   = opts.label.klass || opts.labelKlass ||  defaults.labelClass;
-    this.closeElement = createElementFromString( opts.label.close || opts.labelClose ||  defaults.close );
+    var values        = parseValues( opts.values );
+    this.tagClass     = opts.tag.klass || opts.tagKlass ||  defaults.tagClass;
+    this.closeElement = createElementFromString( opts.tag.close || opts.tagClose ||  defaults.close );
     this.hiddenSpan   = createHiddenSpan();
     this.delimiter    = parseDelimiters(  opts.delimiter );
-    this.editable     = !booleanValues.false.includes( opts.editable );
-    this.draggable    = !booleanValues.false.includes( opts.draggable );
-    this.close        = !booleanValues.false.includes( opts.close );
-    this.backspace    = !booleanValues.false.includes( opts.backspace );
+    this.editable     = !defaults.booleans.false.includes( opts.editable );
+    this.draggable    = !defaults.booleans.false.includes( opts.draggable );
+    this.close        = !defaults.booleans.false.includes( opts.close );
+    this.backspace    = !defaults.booleans.false.includes( opts.backspace );
     this.input        = createInput( this, container,  this.hiddenSpan );
     this.container    = createContainer( container, this.input );
     this.id           = this.container.id;
 
     if  ( this.draggable  ) attachDragListeners( this );
     if  ( this.input.name ) this.name = this.input.name; 
-    for ( var i in events ) this[ i ] = opts[ i ] || events[ i ];
+    
+    for ( var i in defaults.events ) this[ i ] = opts[ i ] || defaults.events[ i ];
 
     build ( this.container, this.input, this.hiddenSpan );
     TaggableInput.elements [ this.id ] = this;
@@ -254,59 +243,60 @@ var TaggableInput = ( function() {
   };
 
   TaggableInput.prototype = {
-    add : function( labels ) {
-      var length = this.tags().length;
-      labels = [].concat.apply( [], [ labels ] );
-      for ( var i = 0; i < labels.length; i++ ) {
-        if ( ! ( typeof labels[i] === 'string' && labels[i].length ) ) continue;
-        labels[i] = this.beforeInsert( labels[i] );
-        labels[i] = createLabel( this, labels[i] );
-        this.container.insertBefore( labels[i] , this.input );
-        this.afterInsert( labels[i] );
-        if ( !this.name ) continue;
-        var hiddenInput = createHiddenInput( this.name, length, labels[i] );
-        this.container.appendChild( hiddenInput );
-      }
+    add : function( tags ) {
+      tags = [].concat( tags );
+      var taggableInput = this;
+      return tags.reduce( function ( elements, tag ) {
+        var element  = taggableInput._createTag( tag );
+        if ( element ) elements.push( element );
+        return elements;
+      }, [] );
     },
-    remove : function( label ) {
-      if ( typeof label === 'number' ) label = this.tags( label );
-      if ( !label ) return;
-      label.parentNode.removeChild( label );
+    remove : function( matcher ) {
+      var tags = [].concat( this.tags( matcher ) );
+      for ( var i = 0; i < tags.length; i++ ) if ( tags[i] ) tags[i].parentNode.removeChild( tags[i] );
       this._reset();
-      return label;
+      return tags;
     },
     pop : function() { 
-      var label = this.remove( -1 ); 
-      return label; 
+      var tag = this.remove( -1 ); 
+      return tag; 
     },
-    tags: function( index ) {
-      var tags = this.container.getElementsByClassName( defaults.labelContainerClass );
-      if ( !index ) return tags;
-      index = ( tags.length + index ) % tags.length;
-      return tags[index];
+    tags: function( matcher ) {
+      var tags;
+      if ( matcher instanceof HTMLElement ) tags = [].concat( matcher )
+      else {
+        tags = this.container.getElementsByClassName( defaults.tagContainerClass );
+        if      ( typeof matcher === 'number' ) tags    = tags[ ( tags.length + matcher ) % tags.length ]
+        else if ( typeof matcher === 'string' ) matcher = new Regexp('^'+matcher+'$'); 
+        if      ( matcher instanceof RegExp   ) tags    = [].reduce.apply( tags, [ function( org, item ) { 
+          if ( matcher.test( item.innerText ) ) return org.concat( item ); 
+          return org;
+        }, [] ] );
+      }
+      return Array.apply( null, tags );
     },
-    values: function() {
-      var labels = this.container.getElementsByClassName('label');
-      return [].map.call( labels, function( item ) { return item.innerText; } );
+    values: function( matcher ) {
+      var tags = this.tags( matcher );
+      return [].map.call( tags, function( item ) { return item.innerText; } );
     },
     _reset: function() {
-      if ( this.name ) {
-        var tags = this.tags();
-        var newCache = {};
-        for ( var i = 0; i < tags.length; i++ ) {
-          var id              = tags[i].getAttribute( 'data-cid' );
-          newCache[ id ]      = inputCache[ id ];
-          newCache[ id ].name = this.name + '[' + i + ']'; 
-          inputCache[ id ].parentNode.appendChild( inputCache[ id ] );
-          delete inputCache[ id ];
-        }
-        for ( var key in inputCache ){
-          if ( !inputCache.hasOwnProperty( key ) ) continue; 
-          var value = inputCache[ key ];
-          value.parentElement.removeChild( value );
-        }
-        inputCache = newCache;
+      if ( !this.name ) return;
+      var tags = this.tags();
+      var newCache = {};
+      for ( var i = 0; i < tags.length; i++ ) {
+        var id              = tags[i].getAttribute( 'data-cid' );
+        newCache[ id ]      = inputCache[ id ];
+        newCache[ id ].name = this.name + '[' + i + ']'; 
+        inputCache[ id ].parentNode.appendChild( inputCache[ id ] );
+        delete inputCache[ id ];
       }
+      for ( var key in inputCache ){
+        if ( !inputCache.hasOwnProperty( key ) ) continue; 
+        var value = inputCache[ key ];
+        value.parentElement.removeChild( value );
+      }
+      inputCache = newCache;
     },
     _addTags: function () {
       var items = this.input.value.split( this.delimiter.separator );
@@ -314,17 +304,38 @@ var TaggableInput = ( function() {
       this.add( items );
       this.input.value = '';
     },
+    _createTag: function( item ) {
+      if ( !item || !item.length ) return;
+      var index    = this.tags().length;
+      item = this.beforeInsert( item, index );
+      if ( !item ) return;
+      
+      var tag     = createTagElement( item ); 
+      var content = tag.getElementsByClassName('ti-tag-content')[0];
+      content.parentNode.className += ' ' + this.tagClass;
+      
+      if ( this.editable  ) addEditableListeners ( content ); 
+      if ( this.close     ) addCloseListeners    ( this, content.parentNode );
+      if ( this.draggable ) tag.setAttribute('draggable', 'true'); 
+      if ( this.name      ) {
+        var hiddenInput = createHiddenInput( this.name, index, tag );
+        this.container.appendChild( hiddenInput );
+      }
+      this.container.insertBefore( tag , this.input );
+      this.afterInsert( tag, item, index );
+    }, 
     _calibrateInput: function() {
       this.hiddenSpan.innerText = this.input.value;
       this.input.style.width = this.hiddenSpan.clientWidth + ( this.input.offsetWidth - this.input.clientWidth + 5 ) + 'px';
     }
-  }
+  };
 
   TaggableInput.elements = {};
+  
   window.onload = function(){
     embedTaggableInput(); 
-  }
+  };
 
   return TaggableInput;
-})();
 
+})();

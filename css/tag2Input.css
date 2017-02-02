@@ -8,7 +8,7 @@
   line-height: 2;
 }
 
-.taggable-input .taggable-label .ti-label-drop{
+.taggable-input .ti-tag .ti-tag-drop{
   position: absolute;
   z-index: 0;
   width: 50%;
@@ -16,10 +16,10 @@
   bottom: 0;
 }
 
-.taggable-input .taggable-label .ti-label-drop:last-of-type  { right: 0; }
-.taggable-input .taggable-label .ti-label-drop:first-of-type { left: 0; }
+.taggable-input .ti-tag .ti-tag-drop:last-of-type  { right: 0; }
+.taggable-input .ti-tag .ti-tag-drop:first-of-type { left: 0; }
 
-.taggable-input .taggable-label {
+.taggable-input .ti-tag {
   display: inline-table;
   position: relative;
   max-width: 100%;
@@ -29,11 +29,11 @@
   padding: 0 0.5em 0 0.5em;
 }
 
-.taggable-input .taggable-label.active {
+.taggable-input .ti-tag.active {
   opacity: 0.7;
 }
 
-.taggable-input .taggable-label .ti-label-body.simple {  
+.taggable-input .ti-tag .ti-tag-body.simple {  
   letter-spacing: 0.07em;
   text-shadow: 0 0.1em white;
   color: #555;
@@ -49,13 +49,13 @@
   box-shadow: inset 0 0 0 0.1em rgba(255, 255, 255, 0.7), 0 0.1em 0.1em rgba(0, 0, 0, 0.05);
   padding: 0 1em;
 }
-.taggable-input .taggable-label .ti-label-body {  
+.taggable-input .ti-tag .ti-tag-body {  
   position: relative;
   z-index: 1;
   margin: 0 auto;
 }
 
- .taggable-input .taggable-label[draggable] { cursor: move; }
+ .taggable-input .ti-tag[draggable] { cursor: move; }
 
 .taggable-input input {
   outline: none;
@@ -66,7 +66,7 @@
   line-height: inherit;
   margin: 0 0 5px 5px; 
 }
-.taggable-input .taggable-label .ti-label-body .ti-label-close {  
+.taggable-input .ti-tag .ti-tag-body .ti-tag-close {  
   cursor: pointer;
   text-align: center;
   vertical-align: baseline;
@@ -74,16 +74,16 @@
   line-height: 1.26;
   margin-left: 1em;
 }
-.taggable-input .taggable-label .ti-label-body .ti-label-close span {  
+.taggable-input .ti-tag .ti-tag-body .ti-tag-close span {  
   font-size: 80%;
 }
 
-.taggable-input .taggable-label .ti-label-body .ti-label-content {  
+.taggable-input .ti-tag .ti-tag-body .ti-tag-content {  
   line-height: 1;
   vertical-align: baseline;
   display: inline-block;
 }
-.taggable-input .taggable-label .ti-label-body .ti-label-content[contenteditable="true"] {  
+.taggable-input .ti-tag .ti-tag-body .ti-tag-content[contenteditable="true"] {  
   cursor: text; 
   z-index: 2;
 }

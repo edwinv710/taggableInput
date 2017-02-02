@@ -72,7 +72,6 @@ TaggableInputs can be created by ejther adding options as data attributes direct
 ``` javascript
   taggableInput.tags();
 ```
-
 ### Events
 
 * **beforeInsert** ( text, index ) -  Executes before a tag is inserted. To prevent the insertion of a tag, set the function to returns false. To change the tag's text, return a string with the desired text.
@@ -93,16 +92,25 @@ TaggableInputs can be created by ejther adding options as data attributes direct
   * index ( Number ) - The zero-based index.
   * Example: 
 ``` javascript 
-  taggableInput.tags();
-```
-## Using TaggableInputs with forms
+  taggableInput.afterInput = function( label, text, index ) {
+    if ( parseInt( text ) ) return;
+    label.className += ' number-warning';
+  };
+ ```
 
-To embed TaggableInputs into forms add an input input with the class `taggable-input` and a name attribute. The library will use that inpit field to contruct the taggable input. Each tag added will c4eate a hidden input field usimg the name given to the textbox. Each tag will create a hidden input field using the name attribute associated with the input The index associated with the input correlate with the order of the tags.
+### Using TaggableInputs with forms
+
+To use TaggableInput with forms, add an input with the class `taggable-input` and a name attribute. Options can also be added as data attributes. Labels created will also create hidden input fields using the name given to the textbox. Re-arranging tags will change the index of the hidden input fields allowing for the sending of tags in the order they appear.
 
 ```html
   <input type=text name=foo class=taggable-input values='foo1,foo2,foo3' /> 
 ```
+Inputs can also be passed to the javascript api to create the same effect.
 
+```javascript
+  var textbox = document.querySelector('input[name=foo]');
+  var taggableInput = TaggableInput( textbox, { values: [ 'foo1', 'foo2', 'foo3' ] } );
+```
 
 ## Contributing
 
