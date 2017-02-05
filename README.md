@@ -1,10 +1,11 @@
 ## TaggableInput
 
-TaggableInput allows for the seamless creation of tags directly from an input field. To see it in action, visit the demo on [CodePen] (https://codepen.io/recursiveEd/pen/KNbLKN).
-
-### Getting Started
+TaggableInput allows for the seamless creation of tags directly from an input field. 
 
 [ View examples on CodePen ](https://codepen.io/recursiveEd/pen/KNbLKN)
+
+#### Getting Started
+
 
 A TaggableInput is created either by adding the class 'taggable-input' to an HTML DOM element and passing the parameters through data attributes or by using the javascript API. 
 
