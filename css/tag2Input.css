@@ -8,16 +8,34 @@
   line-height: 2;
 }
 
+.taggable-input .ti-drop {
+  z-index: 
+}
+
+.taggable-input.ti-vertical .ti-tag .ti-tag-drop{
+  top: 50%;
+  height: 50%;
+  left: 0;
+  width: 100%;  
+}
+
+.taggable-input.ti-vertical .ti-tag .ti-tag-drop:first-of-type {
+  top: 0;
+}
+
 .taggable-input .ti-tag .ti-tag-drop{
+  z-index: 1;
   position: absolute;
-  z-index: 0;
   width: 50%;
   top: 0;
   bottom: 0;
+  right: 0;
 }
 
-.taggable-input .ti-tag .ti-tag-drop:last-of-type  { right: 0; }
-.taggable-input .ti-tag .ti-tag-drop:first-of-type { left: 0; }
+.taggable-input .ti-tag .ti-tag-drop:first-of-type  { 
+  left: 0;
+  right auto
+}
 
 .taggable-input .ti-tag {
   display: inline-table;
@@ -27,6 +45,10 @@
   margin-bottom: 5px;  
   overflow: hidden;
   padding: 0 0.5em 0 0.5em;
+}
+
+.taggable-input.ti-vertical .ti-tag {
+  display: block;  
 }
 
 .taggable-input .ti-tag.active {
@@ -50,8 +72,6 @@
   padding: 0 1em;
 }
 .taggable-input .ti-tag .ti-tag-body {  
-  position: relative;
-  z-index: 1;
   margin: 0 auto;
 }
 
@@ -67,12 +87,15 @@
   margin: 0 0 5px 5px; 
 }
 .taggable-input .ti-tag .ti-tag-body .ti-tag-close {  
+  position: relative;
+  z-index: 2;
   cursor: pointer;
   text-align: center;
   vertical-align: baseline;
   display: inline-block;
-  line-height: 1.26;
-  margin-left: 1em;
+  line-height: 1.8;
+  margin-left: 0.8em;
+  float: right;
 }
 .taggable-input .ti-tag .ti-tag-body .ti-tag-close span {  
   font-size: 80%;
@@ -81,9 +104,10 @@
 .taggable-input .ti-tag .ti-tag-body .ti-tag-content {  
   line-height: 1;
   vertical-align: baseline;
-  display: inline-block;
+
 }
 .taggable-input .ti-tag .ti-tag-body .ti-tag-content[contenteditable="true"] {  
+  position: relative;
   cursor: text; 
   z-index: 2;
 }

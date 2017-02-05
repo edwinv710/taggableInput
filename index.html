@@ -1,7 +1,5 @@
 <!doctype html>
 
-<html lang="en">
-<head>
   <meta charset="utf-8">
 
   <title>Taggable Input Example</title>
@@ -12,8 +10,8 @@
     @import url('https://fonts.googleapis.com/css?family=Lato');
     .container {
       margin: 0 auto;
-      padding: 20px;
-      width: 800px;
+      padding: 60px;
+      width: 600px;
       background-color: #fff;
       box-shadow: 0 0 0 0, 0 6px 12px rgba(34,34,34,0.1);
       -webkit-border-radius: 3px;
@@ -22,27 +20,52 @@
       margin-top: 30px;
       background-color: white;
     }
+    .container header a { 
+      color: white;
+      background-color: #222;
+      line-height: 2;
+      padding: 0 10px;
+      display: inline-block;
+      float: right;
+      border-radius: 3px;
+      text-decoration: none;
+    }
     body {
       background-color: #e8e8e8;
       color: #222;
       font-size: 14px;
       font-family: lato;
+      line-height: 1.6;
     }
-    p.payload {
-      white-space: pre;
-
-    }
-    .form-group {
-      margin-bottom: 10px;
-    }
-    .form-group label {
-      margin-right: 10px;
-    }
-    .form-group > * {
-      margin-bottom: 5px;
+    form { margin: 20px 0px 25px; }
+    h2 { margin: 0px 0px 30px 0; }
+    h3 { margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block;  margin-bottom: 5px; font-weight: bold; }
+    .form-group > input {
+      padding: 5px 7px;
+      font-size: 12.5px;
     }
 
-    
+    .code-block.json {
+      border-left: 3px solid rgba( 37, 36, 226, 0.7 );
+    }
+
+    .code-block {
+      border: solid 1px rgba(0,0,0,0.1);
+      background-color: rgba(253, 243, 217, 0.15);
+      padding: 15px;
+      border-left: 3px solid rgba(226, 37, 36, 0.7);
+      margin-top: 20px;
+      overflow: scroll;
+      color: rgb( 70, 70, 70 );
+    } 
+
+    .code-block > code { white-space: pre; }
+
+    .example { margin-bottom: 40px; }
+    .example:last-of-type { margin-bottom: 0px; }
+
   </style>
   <!--[if lt IE 9]>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
@@ -51,41 +74,61 @@
 
 <body>
   <section class='container'>
-    <h1> Taggable Input </h1>
-    <p> Taggable Input is a javascript library that allows for the seamless creation of tags. </p>
-    <h4> Basic Example: </h4>
-    <div id='example-input'> </div>
-    <br>
-    <h4> Form Example </h4>
-    <p> A basic form example. Unpon clicking submit, the form's payload will be printed below. </p>
-    <form>
-      <div class='form-group'>
-        <label for='name'> Name: </label>
-        <input name=name type=text value='Jon Snow' />
-      </div>
-      <div class='form-group'>
-        <label for=interests> Interests: </label>
-        <input name=interests type=text />
-      </div>
-      <div class='form-group'>
-        <input type=submit />
-      </div>
-    </form>
-    <h4> Results </h4>
-    <p class='payload'>
-    </p>
-    <h4> Tag Example </h4>
-    <div class=taggable-input data-close=false data-label-class='label label-success' data-values="Is,it,me,you,are,looking,for ?"> </div>
-    <input class=taggable-input data-draggable=false data-values="this,is,cool" />
+    <header> <a href="https://github.com/edwinv710/TaggableInput">View on GitHub</a></header> 
+    <h2> TaggableInput </h2>
+    <div class=example >
+      <h3> Basic Example: </h3>
+      <p> Below is the a basic TaggableInput created using the default options. </p> 
+      <div id='ti-basic'> </div>
+      <div class=code-block><code> var basicTaggbleInput  = new TaggableInput ( 'ti-basic' ); </code></div>
+    </div>
+    <div class=example >
+      <h3> Using with Forms </h3>
+      <p> A TaggableInput can also be used as a form field. Form values are automatically updated with each tag added. Editing and changing the order of tags will also update the form's payload. The input field passed to the api must have a valid name attribute. </p>
+      <form >
+        <div class='form-group'>
+          <label for='name'> Name: </label>
+          <input name=name type=text value='Jon Snow' />
+        </div>
+        <div class='form-group'>
+          <label for=interests> Interests: </label>
+          <input name=interests type=text />
+        </div>
+        <div class='form-group'>
+          <input type=submit />
+        </div>
+      </form>
+      <div class='code-block json'><code class=payload> Press submit to see the form's payload.  </code></div>
+      <div class=code-block><code> var formTaggbleInput   = new TaggableInput ( 'ti-form-input', {
+  delimiter: [ ' ', ',' ],
+  values: ['Nothing', 'Ygritte', 'Ghost', 'Brotherhood', 'Stark' ],
+  editable: true
+} ); </code></div>
+    </div>
+    <div class=example >
+      <h3> HTML Element </h3>
+      <p> A TaggableInput can be created without using the Javascript API directly. Add the class `taggable-input` to a valid HTML DOM element. Options can be passed as data attributes. </p>
+      <div class=taggable-input data-close=false data-values="Is,it,me,you,are,looking,for ?"> </div>
+      <div class=code-block><code> &lt;div class=taggable-input data-close=false data-values="Is,it,me,you,are,looking,for ?"&gt; &lt;/div&gt;</code> </div>
+    </div>
+    <div class=example >
+      <h3> Veritcal </h3>
+      <p> TaggableInput can be dsiplayed vertically by adding the ti-vertical class to the container. </p>
+      <div class='taggable-input ti-vertical' data-delimiter='13' data-values="Westworld, Game of Thrones, Breaking Bad, The Wire"> </div>
+      <div class=code-block><code> &lt;div class='taggable-input ti-vertical' data-delimiter='13' data-values="I,am,up,and,down,but,not,around"> </div>
+    </div>
   </section>
   <script src="js/tag2Input.js"></script>
   <script>
-    var results     = document.querySelector( 'p.payload' );
+    var results     = document.querySelector( '.payload' );
     var form        = document.forms[0];
     var formInput   = document.querySelector('input[name=interests]'); 
-    var basicTaggbleInput  = new TaggableInput ( 'example-input', {});
+
+    var basicTaggbleInput  = new TaggableInput ( 'ti-basic' );
     var formTaggbleInput   = new TaggableInput ( formInput, {
-      delimiter: [ ' ', ',' ]
+      delimiter: [ ' ', ',' ],
+      values: ['Nothing', 'Ygritte', 'Ghost', 'Brotherhood', 'Stark' ],
+      editable: true
     } );
 
     var payload = function() {
@@ -96,7 +139,7 @@
     }
 
     var appendFormData = function () {
-      results.innerHTML = JSON.stringify( payload() , undefined, 2 );
+      results.innerHTML = JSON.stringify( payload() , undefined, 2 ).replace(/"(.*)":/g, "$1:").replace(/"/g, "'");
     }
 
    form.addEventListener( 'submit', function ( e ) {

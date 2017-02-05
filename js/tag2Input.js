@@ -5,7 +5,7 @@ var TaggableInput = ( function() {
     tagContainerClass : 'ti-tag',
     containerClass    : 'taggable-input',
     close             : '<span>x</span>',
-    delimiters        : { keycode: [ 13 ], separator: undefined },
+    delimiters        : { keycode: [ 32 ], separator: undefined },
     booleans          : {
       true:  [ 't', 'true' , '1', 1, true  ],
       false: [ 'f', 'false', '0', 0, false ]
@@ -29,11 +29,11 @@ var TaggableInput = ( function() {
     var id        = Math.random().toString(36).substr(2, 18).toUpperCase();
     var tag       = document.createElement('div');
     tag.className = defaults.tagContainerClass;
-    tag.innerHTML = "<div class='ti-tag-drop'></div>"        + 
-                      "<div class='ti-tag-body'>"            +
-                        "<div class='ti-tag-content'>"+text+"</div>" +
-                      "</div>"                               +
-                      "<div class='ti-tag-drop'></div>"
+    tag.innerHTML = "<div class='ti-tag-drop'></div>"                + 
+                    "<div class='ti-tag-drop'></div>"                +
+                    "<div class='ti-tag-body'>"                      +
+                      "<span class='ti-tag-content'>"+text+"</span>" +
+                    "</div>"                               
     tag.setAttribute ( 'data-cid', id ); 
     
     return tag;
@@ -80,12 +80,14 @@ var TaggableInput = ( function() {
     var elements = document.querySelectorAll('.'+defaults.containerClass+':not([data-complete="true"])');
     for ( var i = 0; i < elements.length; i++ ) {
       var attributes = [].reduce.apply(  elements[ i ].attributes, [ function( obj, attr ) {
-        if ( !attr.name.includes( 'data-' ) )
+        if ( attr.name.includes( 'data-' ) )
           obj[ attr.name.replace('data-', '').replace(/(\-\w)/, function ( matches ) {
             return matches[1].toUpperCase() 
           } ) ]  = attr.value;
         return obj;
       }, {} ]);
+      console.log( 'attributes' );
+      console.log( attributes );
       var taggableInput  =  new TaggableInput( elements[i], attributes ); 
     }
   };
@@ -99,7 +101,7 @@ var TaggableInput = ( function() {
     del           = [].concat.apply( [], [ del ] );
     var delimiter = { keycode: [], separator: [] };
     for ( var i = 0; i < del.length; i++ ){
-      if      ( typeof del[ i ] === 'number' ) delimiter.keycode.push( del[i] )
+      if      ( !isNaN( del[ i ] ) ) delimiter.keycode.push( parseInt( del[i] ) )
       else if ( typeof del[i] === 'string'   ) delimiter.separator.push( del[i] );
     }
     if ( delimiter.keycode.length === 0 && delimiter.separator.length === 0 ) return defaults.delimiters; 
@@ -115,7 +117,7 @@ var TaggableInput = ( function() {
       container = document.createElement( 'div' );
       input.parentNode.insertBefore( container, input );
     }
-    container.className = ' ' + defaults.containerClass;
+    container.className = container.className.replace( defaults.containerClass, '' ) + ' ' + defaults.containerClass;
     container.id = container.id || Math.random().toString(36).substring( 2, 18 ).toUpperCase();
     container.dataset.complete = true;
     container.onclick   = function( e ) {
@@ -143,7 +145,7 @@ var TaggableInput = ( function() {
   var createHiddenInput = function( name, index, tag) {
     var input = document.createElement( 'input' );
     var id    = tag.getAttribute( 'data-cid' );
-    var text  = tag.getElementsByClassName('ti-tag-content')[0].innerText;
+    var text  = tag.getElementsByClassName('ti-tag-content')[0].textContent;
     input.setAttribute( 'type', 'hidden' );
     input.name  = name+'['+index+']';
     input.value = text; 
@@ -187,16 +189,17 @@ var TaggableInput = ( function() {
   };
 
   var addEditableListeners = function ( content ) {
+    content.parentNode.parentNode.className += ' ti-editable';
     content.setAttribute( 'contenteditable', true );
     content.addEventListener( 'keydown', function(e) {
       if ( e.which === 13 ) e.preventDefault();
-      else if ( e.which === 8 && this.innerText.length === 1 ) 
+      else if ( e.which === 8 && this.textContent.length === 1 ) 
         this.parentNode.parentNode.parentNode.removeChild(this.parentNode);
     });
     content.addEventListener( 'blur', function(e) {
       var id      = this.parentNode.parentNode.getAttribute( 'data-cid' );
       var input   = inputCache[ id ]; 
-      if( input )input.value = this.innerText;
+      if( input )input.value = this.textContent;
     });
     ['keyup','mouseup','cut'].forEach( function( event ) { 
       content.addEventListener( event, function(e){
@@ -224,7 +227,7 @@ var TaggableInput = ( function() {
     this.closeElement = createElementFromString( opts.tag.close || opts.tagClose ||  defaults.close );
     this.hiddenSpan   = createHiddenSpan();
     this.delimiter    = parseDelimiters(  opts.delimiter );
-    this.editable     = !defaults.booleans.false.includes( opts.editable );
+    this.editable     = defaults.booleans.true.includes( opts.editable );
     this.draggable    = !defaults.booleans.false.includes( opts.draggable );
     this.close        = !defaults.booleans.false.includes( opts.close );
     this.backspace    = !defaults.booleans.false.includes( opts.backspace );
@@ -244,7 +247,7 @@ var TaggableInput = ( function() {
 
   TaggableInput.prototype = {
     add : function( tags ) {
-      tags = [].concat( tags );
+      tags = [].concat.apply( [], Array.apply( null, arguments ) );
       var taggableInput = this;
       return tags.reduce( function ( elements, tag ) {
         var element  = taggableInput._createTag( tag );
@@ -267,10 +270,10 @@ var TaggableInput = ( function() {
       if ( matcher instanceof HTMLElement ) tags = [].concat( matcher )
       else {
         tags = this.container.getElementsByClassName( defaults.tagContainerClass );
-        if      ( typeof matcher === 'number' ) tags    = tags[ ( tags.length + matcher ) % tags.length ]
+        if      ( typeof matcher === 'number' ) tags    = [ tags[ ( tags.length + matcher ) % tags.length ] ];
         else if ( typeof matcher === 'string' ) matcher = new Regexp('^'+matcher+'$'); 
         if      ( matcher instanceof RegExp   ) tags    = [].reduce.apply( tags, [ function( org, item ) { 
-          if ( matcher.test( item.innerText ) ) return org.concat( item ); 
+          if ( matcher.test( item.getElementsByClassName('ti-tag-content')[0].textContent ) ) return org.concat( item ); 
           return org;
         }, [] ] );
       }
@@ -278,7 +281,7 @@ var TaggableInput = ( function() {
     },
     values: function( matcher ) {
       var tags = this.tags( matcher );
-      return [].map.call( tags, function( item ) { return item.innerText; } );
+      return [].map.call( tags, function( item ) { return item.getElementsByClassName('ti-tag-content')[0].textContent; } );
     },
     _reset: function() {
       if ( !this.name ) return;
@@ -325,7 +328,7 @@ var TaggableInput = ( function() {
       this.afterInsert( tag, item, index );
     }, 
     _calibrateInput: function() {
-      this.hiddenSpan.innerText = this.input.value;
+      this.hiddenSpan.textContent = this.input.value;
       this.input.style.width = this.hiddenSpan.clientWidth + ( this.input.offsetWidth - this.input.clientWidth + 5 ) + 'px';
     }
   };
