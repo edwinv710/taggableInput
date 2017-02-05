@@ -17,7 +17,7 @@ module.exports = function(grunt) {
     uglify: {
       my_target: {
         files: {
-          'js/tag2Input.min.js': ['js/tag2Input.js']
+          'js/taggableInput.min.js': ['js/taggableInput.js']
         }
       }
     }
