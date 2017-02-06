@@ -177,7 +177,7 @@ Events allow for the modification and manipulation of tags before and after inse
     if( text.length ) return text;
     return false;
   };
- ```
+```
 
 * **afterInsert** ( tag, text, index) - Executes after a tag is inserted.
   * tag ( HTMLElement ) - The newly added DOM element.
@@ -189,7 +189,7 @@ Events allow for the modification and manipulation of tags before and after inse
     if ( parseInt( text ) ) return;
     tag.className += ' number-warning';
   };
- ```
+```
 
 ### Using TaggableInput with forms
 
