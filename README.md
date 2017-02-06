@@ -164,6 +164,7 @@ TaggableInput can be used to pass tag values with through forms. The library wil
   taggableInput.values();
   taggableInput.values( 3 );
 ```
+
 ### Events
 
 Events allow for the modification and manipulation of tags before and after insertion. They can be used to validate label and changing labels appearance by manipulating the DOM element. 
