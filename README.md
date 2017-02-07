@@ -57,15 +57,15 @@ A TaggableInput is created either by adding the class 'taggable-input' to an HTM
 ```
 
 * **tags** ( matcher ) - Returns an array of HTMLElements, specified by the matcher . If the matcher is omitted, returns all tags in the given input.
-  * matcher ( optional ) - The zero based index, regex, string representation of a tag. 
+  * matcher ( optional ) - The zero-based index, regex, string representation of a tag. 
     * Example: 
 ``` javascript
   taggableInput.tags();
   taggableInput.tags( /code/ );
 ```
 
-* **values** ( matcher ) - Returns an array of string specified by the matcher . If the matcher is omitted, returns all tags in the given input.
-  * matcher ( optional ) - The zero based index, regex, string representation of a tag. 
+* **values** ( matcher ) - Returns an array of strings specified by the matcher. If the matcher is omitted, returns all tags in the given input.
+  * matcher ( optional ) - The zero-based index, regex, or string representation of a tag. 
     * Example: 
 ``` javascript
   taggableInput.values();
@@ -100,7 +100,7 @@ Events allow for the modification and manipulation of tags before and after inse
 
 ### Using TaggableInput with forms
 
-TaggableInput can be used to pass tag values with through forms. The library will detect the input field's name attribute and create a hidden input fields for each tag created. Re-arranging tags will change the index of the hidden input fields allowing for the sending of tags in the order they appear.
+TaggableInput can be used to pass tag values with through forms. The library will detect the input field's name attribute and create a hidden input field for each tag created. Re-arranging tags will change the index of the hidden input fields allowing for the sending of tags in the order they appear.
 
 ```html
   <div class='taggable-input' data-delimiter data-editable data-draggable data-removable data-close >
@@ -135,7 +135,7 @@ TaggableInput can be used to pass tag values with through forms. The library wil
 ```
 
 * **remove** ( matcher ) -  Removes tags from an input and returns the DOM elements.
-  * matcher ( required ) - The zero based index, regex, string representation of a tag. 
+  * matcher ( required ) - The zero-based index, regex, string representation of a tag. 
 
 ```javascript 
   taggableInput.remove( 2 );
@@ -150,15 +150,15 @@ TaggableInput can be used to pass tag values with through forms. The library wil
 ```
 
 * **tags** ( matcher ) - Returns an array of HTMLElements, specified by the matcher . If the matcher is omitted, returns all tags in the given input.
-  * matcher ( optional ) - The zero based index, regex, string representation of a tag. 
+  * matcher ( optional ) - The zero-based index, regex, string representation of a tag. 
 
 ```javascript
   taggableInput.tags();
   taggableInput.tags( /code/ );
 ```
 
-* **values** ( matcher ) - Returns an array of string specified by the matcher . If the matcher is omitted, returns all tags in the given input.
-  * matcher ( optional ) - The zero based index, regex, string representation of a tag. 
+* **values** ( matcher ) - Returns an array of strings specified by the matcher. If the matcher is omitted, returns all tags in the given input.
+  * matcher ( optional ) - The zero-based index, regex, or string representation of a tag. 
 
 ```javascript
   taggableInput.values();
@@ -194,7 +194,7 @@ Events allow for the modification and manipulation of tags before and after inse
 
 ### Using TaggableInput with forms
 
-TaggableInput can be used to pass tag values with through forms. The library will detect the input field's name attribute and create a hidden input fields for each tag created. Re-arranging tags will change the index of the hidden input fields allowing for the sending of tags in the order they appear.
+TaggableInput can be used to pass tag values with through forms. The library will detect the input field's name attribute and create a hidden input field for each tag created. Re-arranging tags will change the index of the hidden input fields allowing for the sending of tags in the order they appear.
 
 ```html
   <input type="text" name="foo" class="taggable-input" values="foo1,foo2,foo3" /> 
