@@ -86,8 +86,6 @@ var TaggableInput = ( function() {
           } ) ]  = attr.value;
         return obj;
       }, {} ]);
-      console.log( 'attributes' );
-      console.log( attributes );
       var taggableInput  =  new TaggableInput( elements[i], attributes ); 
     }
   };
@@ -308,7 +306,7 @@ var TaggableInput = ( function() {
       this.input.value = '';
     },
     _createTag: function( item ) {
-      if ( !item || !item.length ) return;
+      if ( !item || !item.trim().length ) return;
       var index    = this.tags().length;
       item = this.beforeInsert( item, index );
       if ( !item ) return;
